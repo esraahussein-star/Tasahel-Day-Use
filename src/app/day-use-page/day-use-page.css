@@ -1,0 +1,455 @@
+/* =========================================================
+   TASAHEL APP LAYOUT
+========================================================= */
+
+:host {
+  display: block;
+
+  width: 100%;
+  height: 100vh;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  font-family:
+    "Cairo",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  color: #14251c;
+
+  background:
+    #f3f7f5;
+
+  --green: #159a5a;
+  --green-dark: #0e7c48;
+  --green-soft: #eaf7f0;
+
+  --surface: #ffffff;
+  --surface-soft: #f8fbf9;
+
+  --border: #dfe8e3;
+  --text-soft: #708077;
+
+  --shadow-soft:
+    0 10px 35px rgba(18, 45, 30, 0.06);
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+  width: 100%;
+  height: 100vh;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f7faf8 0%,
+      #f2f6f4 100%
+    );
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.main-content {
+  flex: 1 1 auto;
+
+  width: 100%;
+  height: calc(100vh - 76px);
+
+  min-width: 0;
+  min-height: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(420px, 520px)
+    minmax(0, 1fr);
+
+  gap: 14px;
+
+  padding: 14px;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  direction: ltr;
+}
+
+
+/* =========================================================
+   CHAT PANEL
+========================================================= */
+
+.chat-panel {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  direction: rtl;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 22px;
+
+  background:
+    var(--surface);
+
+  box-shadow:
+    var(--shadow-soft);
+}
+
+
+/* =========================================================
+   DAY USE WRAPPER
+========================================================= */
+
+.dayuse-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  direction: rtl;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 22px;
+
+  background:
+    var(--surface);
+
+  box-shadow:
+    var(--shadow-soft);
+}
+
+
+/* =========================================================
+   DAY USE COMPONENT
+========================================================= */
+
+app-day-use {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  direction: rtl;
+
+  background:
+    transparent;
+}
+
+
+/* =========================================================
+   CHILD SAFETY
+========================================================= */
+
+.main-content > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+
+/* =========================================================
+   LOADING / ERROR STATE
+========================================================= */
+
+.places-state {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  box-sizing: border-box;
+
+  background:
+    rgba(248, 251, 249, 0.96);
+
+  backdrop-filter:
+    blur(4px);
+
+  color:
+    var(--text-soft);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+
+.places-state::after {
+  content: "";
+
+  width: 18px;
+  height: 18px;
+
+  margin-inline-start: 10px;
+
+  border:
+    2px solid #d2e6da;
+
+  border-top-color:
+    var(--green);
+
+  border-radius: 50%;
+
+  animation:
+    appLoader 0.8s linear infinite;
+}
+
+
+@keyframes appLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.places-state.error {
+  color:
+    #9f443c;
+
+  background:
+    rgba(255, 248, 247, 0.96);
+}
+
+
+.places-state.error::after {
+  display: none;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1500px) {
+
+  .main-content {
+    grid-template-columns:
+      520px
+      minmax(0, 1fr);
+
+    gap: 16px;
+
+    padding:
+      16px;
+  }
+
+}
+
+
+/* =========================================================
+   MEDIUM DESKTOP
+========================================================= */
+
+@media (
+  max-width: 1200px
+) {
+
+  .main-content {
+    grid-template-columns:
+      430px
+      minmax(0, 1fr);
+
+    gap: 10px;
+
+    padding: 10px;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (
+  max-width: 950px
+) {
+
+  .main-content {
+    grid-template-columns:
+      360px
+      minmax(0, 1fr);
+
+    gap: 8px;
+
+    padding: 8px;
+  }
+
+
+  .chat-panel,
+  .dayuse-wrapper {
+    border-radius:
+      16px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (
+  max-width: 760px
+) {
+
+  :host {
+    height: auto;
+
+    min-height: 100vh;
+
+    overflow: visible;
+  }
+
+
+  .app {
+    height: auto;
+
+    min-height: 100vh;
+
+    overflow: visible;
+  }
+
+
+  .main-content {
+    height: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding:
+      10px;
+
+    overflow: visible;
+  }
+
+
+  .chat-panel {
+    width: 100%;
+
+    height: 560px;
+    min-height: 560px;
+
+    flex:
+      0 0 560px;
+
+    border-radius:
+      18px;
+  }
+
+
+  .dayuse-wrapper {
+    width: 100%;
+
+    height: 720px;
+    min-height: 720px;
+
+    flex:
+      0 0 720px;
+
+    border-radius:
+      18px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (
+  max-width: 480px
+) {
+
+  .main-content {
+    padding:
+      6px;
+
+    gap:
+      8px;
+  }
+
+
+  .chat-panel {
+    height:
+      520px;
+
+    min-height:
+      520px;
+
+    flex-basis:
+      520px;
+
+    border-radius:
+      14px;
+  }
+
+
+  .dayuse-wrapper {
+    height:
+      660px;
+
+    min-height:
+      660px;
+
+    flex-basis:
+      660px;
+
+    border-radius:
+      14px;
+  }
+
+}
