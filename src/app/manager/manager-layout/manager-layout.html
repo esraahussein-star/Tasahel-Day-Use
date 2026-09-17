@@ -1,0 +1,356 @@
+<div class="manager-shell" dir="rtl">
+
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+  <aside class="manager-sidebar">
+
+    <div class="brand">
+
+      <img
+        src="/tasahel-logo.png"
+        alt="Tasahel">
+
+      <div>
+
+        <strong>
+          Tasahel
+        </strong>
+
+        <span>
+          Management Workspace
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="nav-section-label">
+      إدارة التشغيل
+    </div>
+
+
+    <nav class="manager-nav">
+
+      <a
+        routerLink="/manager"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+
+        <lucide-icon
+          [img]="LayoutDashboard"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          الرئيسية
+        </span>
+
+      </a>
+
+
+      <a
+        routerLink="/manager/team"
+        routerLinkActive="active">
+
+        <lucide-icon
+          [img]="Users"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          متابعة الفريق
+        </span>
+
+      </a>
+
+
+      <a
+        routerLink="/manager/assignments"
+        routerLinkActive="active">
+
+        <lucide-icon
+          [img]="ClipboardList"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          توزيع الطلبات
+        </span>
+
+      </a>
+
+
+      <a
+        routerLink="/manager/activity"
+        routerLinkActive="active">
+
+        <lucide-icon
+          [img]="Activity"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          متابعة الأداء
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+      <div class="manager-mini-profile">
+
+        <div class="mini-avatar">
+
+          {{
+            (currentUser?.full_name || '?')
+              .charAt(0)
+          }}
+
+        </div>
+
+
+        <div>
+
+          <strong>
+            {{ currentUser?.full_name }}
+          </strong>
+
+          <span>
+            مدير التشغيل
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()">
+
+        <lucide-icon
+          [img]="LogOut"
+          [size]="16">
+        </lucide-icon>
+
+        <span>
+          تسجيل الخروج
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="manager-main">
+
+    <!-- TOPBAR -->
+
+    <header class="manager-topbar">
+
+      <div class="manager-welcome">
+
+        <span>
+          أهلاً،
+        </span>
+
+        <strong>
+          {{ currentUser?.full_name || 'Manager' }}
+        </strong>
+
+        <small>
+          متابعة تشغيل الفريق
+        </small>
+
+      </div>
+
+
+      <div class="topbar-actions">
+
+        <!-- SOCIAL NOTIFICATIONS -->
+
+        <div class="notifications-wrapper">
+
+          <button
+            type="button"
+            class="notification-button"
+            (click)="toggleNotifications($event)">
+
+            <lucide-icon
+              [img]="Bell"
+              [size]="18">
+            </lucide-icon>
+
+
+            <span
+              *ngIf="unreadNotifications > 0"
+              class="notification-count">
+
+              {{ unreadNotifications }}
+
+            </span>
+
+          </button>
+
+
+          <div
+            *ngIf="notificationsOpen"
+            class="notifications-dropdown"
+            (click)="stopDropdownClick($event)">
+
+            <div class="notifications-dropdown-head">
+
+              <div>
+
+                <strong>
+                  الإشعارات
+                </strong>
+
+                <span>
+                  {{ unreadNotifications }}
+                  غير مقروء
+                </span>
+
+              </div>
+
+
+              <button
+                *ngIf="unreadNotifications > 0"
+                type="button"
+                class="mark-read-button"
+                (click)="markAllNotificationsRead()">
+
+                تحديد الكل كمقروء
+
+              </button>
+
+            </div>
+
+
+            <div
+              *ngIf="notifications.length === 0"
+              class="notifications-empty">
+
+              لا توجد إشعارات حاليًا
+
+            </div>
+
+
+            <div
+              *ngIf="notifications.length > 0"
+              class="notifications-list">
+
+              <button
+                *ngFor="
+                  let notification of notifications | slice:0:8;
+                  trackBy: trackByNotificationId
+                "
+                type="button"
+                class="notification-item"
+                [class.unread]="!notification.read"
+                (click)="openNotification(notification)">
+
+                <div class="notification-icon">
+
+                  <lucide-icon
+                    [img]="Bell"
+                    [size]="14">
+                  </lucide-icon>
+
+                </div>
+
+
+                <div class="notification-content">
+
+                  <div class="notification-title">
+
+                    <strong>
+                      {{ notification.title }}
+                    </strong>
+
+
+                    <span
+                      *ngIf="!notification.read"
+                      class="unread-dot">
+                    </span>
+
+                  </div>
+
+
+                  <p>
+                    {{ notification.message }}
+                  </p>
+
+
+                  <small>
+                    {{ getNotificationTime(notification.created_at) }}
+                  </small>
+
+                </div>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROFILE -->
+
+        <div class="profile-chip">
+
+          <div class="profile-avatar">
+
+            {{
+              (currentUser?.full_name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              {{ currentUser?.full_name }}
+            </strong>
+
+            <span>
+              Manager
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- PAGE -->
+
+    <section class="manager-content">
+
+      <router-outlet></router-outlet>
+
+    </section>
+
+  </main>
+
+</div>

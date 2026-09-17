@@ -1,0 +1,410 @@
+<div
+  class="agent-shell"
+  dir="rtl">
+
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+  <aside class="agent-sidebar">
+
+    <!-- BRAND -->
+
+    <div class="sidebar-brand">
+
+      <div class="brand-mark">
+        <img
+          src="/tasahel-logo.png"
+          alt="Tasahel">
+      </div>
+
+      <div class="brand-copy">
+        <strong>Tasahel</strong>
+        <span>Agent Workspace</span>
+      </div>
+
+    </div>
+
+
+    <!-- USER CARD -->
+
+    <div class="sidebar-user">
+
+      <div class="sidebar-user-avatar">
+        {{
+          (currentUser?.full_name || '?')
+            .charAt(0)
+        }}
+      </div>
+
+      <div>
+        <strong>
+          {{ currentUser?.full_name || 'Agent' }}
+        </strong>
+
+        <span>
+          Customer Support Agent
+        </span>
+      </div>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="agent-nav">
+
+      <span class="nav-section-label">
+        WORKSPACE
+      </span>
+
+
+      <a
+        routerLink="/agent"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+
+        <span class="nav-icon">
+          <lucide-icon
+            [img]="LayoutDashboard"
+            [size]="18">
+          </lucide-icon>
+        </span>
+
+        <span class="nav-text">
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <a
+        routerLink="/agent/requests"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+          <lucide-icon
+            [img]="ClipboardList"
+            [size]="18">
+          </lucide-icon>
+        </span>
+
+        <span class="nav-text">
+          My Requests
+        </span>
+
+      </a>
+
+
+      <a
+        routerLink="/agent/places"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+          <lucide-icon
+            [img]="MapPin"
+            [size]="18">
+          </lucide-icon>
+        </span>
+
+        <span class="nav-text">
+          Places & Knowledge
+        </span>
+
+        <small class="read-only-badge">
+          READ ONLY
+        </small>
+
+      </a>
+
+
+      <span class="nav-section-label secondary">
+        ACTIVITY
+      </span>
+
+
+      <a
+        routerLink="/agent/activity"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+          <lucide-icon
+            [img]="History"
+            [size]="18">
+          </lucide-icon>
+        </span>
+
+        <span class="nav-text">
+          Activity Log
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <!-- SIDEBAR FOOTER -->
+
+    <div class="agent-sidebar-footer">
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()">
+
+        <lucide-icon
+          [img]="LogOut"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          Sign Out
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="agent-main">
+
+    <!-- =================================================
+         TOPBAR
+    ================================================== -->
+
+    <header class="agent-topbar">
+
+      <!-- PAGE GREETING -->
+
+      <div class="topbar-greeting">
+
+        <span class="greeting-eyebrow">
+          WELCOME BACK
+        </span>
+
+        <div class="greeting-main">
+          <span>أهلاً،</span>
+
+          <strong>
+            {{ currentUser?.full_name || 'Agent' }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <!-- TOPBAR ACTIONS -->
+
+      <div class="topbar-actions">
+
+        <!-- NOTIFICATIONS -->
+
+        <div class="notifications-wrapper">
+
+          <button
+            type="button"
+            class="notification-button"
+            [class.has-notifications]="
+              unreadNotifications > 0
+            "
+            (click)="toggleNotifications($event)"
+            aria-label="Notifications">
+
+            <span class="notification-icon">
+              <lucide-icon
+                [img]="Bell"
+                [size]="19">
+              </lucide-icon>
+            </span>
+
+            <span
+              *ngIf="unreadNotifications > 0"
+              class="notification-count">
+
+              {{
+                unreadNotifications > 99
+                  ? '99+'
+                  : unreadNotifications
+              }}
+
+            </span>
+
+          </button>
+
+
+          <!-- DROPDOWN -->
+
+          <div
+            *ngIf="notificationsOpen"
+            class="notifications-dropdown"
+            (click)="stopDropdownClick($event)">
+
+            <div class="notifications-dropdown-head">
+
+              <div>
+                <strong>
+                  Notifications
+                </strong>
+
+                <span>
+                  {{
+                    unreadNotifications > 0
+                      ? unreadNotifications + ' unread'
+                      : 'You are all caught up'
+                  }}
+                </span>
+              </div>
+
+              <button
+                *ngIf="unreadNotifications > 0"
+                type="button"
+                class="mark-read-button"
+                (click)="markAllNotificationsRead()">
+
+                Mark all as read
+
+              </button>
+
+            </div>
+
+
+            <div
+              *ngIf="notifications.length === 0"
+              class="notifications-dropdown-empty">
+
+              <div class="empty-notification-icon">
+                <lucide-icon
+                  [img]="Bell"
+                  [size]="21">
+                </lucide-icon>
+              </div>
+
+              <strong>
+                No notifications yet
+              </strong>
+
+              <span>
+                New requests and follow-ups will appear here.
+              </span>
+
+            </div>
+
+
+            <div
+              *ngIf="notifications.length > 0"
+              class="notifications-dropdown-list">
+
+              <button
+                *ngFor="
+                  let notification of notifications | slice:0:8;
+                  trackBy: trackByNotificationId
+                "
+                type="button"
+                class="dropdown-notification"
+                [class.unread]="!notification.read"
+                (click)="openNotification(notification)">
+
+                <div
+                  class="notification-type-icon"
+                  [attr.data-type]="notification.type">
+
+                  <lucide-icon
+                    [img]="Bell"
+                    [size]="15">
+                  </lucide-icon>
+
+                </div>
+
+                <div class="notification-text">
+
+                  <div class="notification-title-row">
+
+                    <strong>
+                      {{ notification.title }}
+                    </strong>
+
+                    <span
+                      *ngIf="!notification.read"
+                      class="unread-dot">
+                    </span>
+
+                  </div>
+
+                  <p>
+                    {{ notification.message }}
+                  </p>
+
+                  <small>
+                    {{
+                      getNotificationTime(
+                        notification.created_at
+                      )
+                    }}
+                  </small>
+
+                </div>
+
+              </button>
+
+            </div>
+
+
+            <a
+              routerLink="/agent/notifications"
+              class="notifications-footer-link"
+              (click)="closeNotifications()">
+
+              View all notifications
+
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROFILE -->
+
+        <div class="topbar-profile">
+
+          <div>
+            <strong>
+              {{ currentUser?.full_name }}
+            </strong>
+
+            <span>
+              Agent
+            </span>
+          </div>
+
+          <div class="profile-avatar">
+            {{
+              (currentUser?.full_name || '?')
+                .charAt(0)
+            }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- CONTENT -->
+
+    <section class="agent-content">
+      <router-outlet></router-outlet>
+    </section>
+
+  </main>
+
+</div>

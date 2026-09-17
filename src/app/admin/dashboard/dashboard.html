@@ -1,0 +1,861 @@
+<div class="dashboard-page" dir="rtl">
+
+  <!-- LOADING -->
+  <div
+    *ngIf="loading"
+    class="dashboard-state">
+
+    جاري تحميل بيانات لوحة التحكم...
+
+  </div>
+
+
+  <!-- ERROR -->
+  <div
+    *ngIf="!loading && errorMessage"
+    class="dashboard-state error-state">
+
+    <p>{{ errorMessage }}</p>
+
+    <button
+      type="button"
+      (click)="loadDashboard()">
+
+      إعادة المحاولة
+
+    </button>
+
+  </div>
+
+
+  <ng-container
+    *ngIf="!loading && !errorMessage && stats">
+
+
+    <!-- =========================
+         PAGE HEADER
+    ========================== -->
+
+    <section class="dashboard-intro">
+
+      <div>
+
+        <span class="intro-label">
+          لوحة المتابعة
+        </span>
+
+        <h2>
+          ملخص أداء اليوم
+        </h2>
+
+        <p>
+          متابعة المحادثات وطلبات الحجز والأداء التشغيلي
+        </p>
+
+      </div>
+
+
+      <div class="live-indicator">
+
+        <span></span>
+
+        بيانات محدثة
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PRIMARY KPIs
+    ========================== -->
+
+    <section class="stats-grid">
+
+
+      <!-- CHATS -->
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+
+          <div class="stat-icon">
+            <lucide-icon
+              [img]="MessageCircleMore"
+              [size]="21"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+          </div>
+
+          <span class="stat-tag">
+            اليوم
+          </span>
+
+        </div>
+
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            إجمالي المحادثات
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.chats_today || 0 }}
+          </strong>
+
+          <small>
+            عدد جلسات المحادثة التي بدأت اليوم
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- REQUESTS -->
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+
+          <div class="stat-icon">
+
+            <lucide-icon
+              [img]="CalendarCheck2"
+              [size]="21"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </div>
+
+          <span class="stat-tag">
+            الحجوزات
+          </span>
+
+        </div>
+
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            طلبات الحجز
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.requests_today || 0 }}
+          </strong>
+
+          <small>
+            إجمالي طلبات Day Use المسجلة اليوم
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- INCOMPLETE -->
+
+      <article class="stat-card warning-card">
+
+        <div class="stat-top">
+
+          <div class="stat-icon warning-icon">
+
+            <lucide-icon
+              [img]="CircleAlert"
+              [size]="21"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </div>
+
+          <span class="stat-tag warning-tag">
+            متابعة
+          </span>
+
+        </div>
+
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            محادثات غير مكتملة
+          </span>
+
+          <strong class="stat-value warning-value">
+            {{ stats.incomplete_chats || 0 }}
+          </strong>
+
+          <small>
+            جلسات لم تصل بعد إلى تسجيل طلب حجز
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- ACTIVE PLACES -->
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+
+          <div class="stat-icon">
+
+            <lucide-icon
+              [img]="Building2"
+              [size]="21"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </div>
+
+          <span class="stat-tag">
+            الأماكن
+          </span>
+
+        </div>
+
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            الأماكن النشطة
+          </span>
+
+          <strong class="stat-value">
+            {{ stats.active_places || 0 }}
+          </strong>
+
+          <small>
+            الأماكن المتاحة للعملاء حاليًا
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================
+         PERFORMANCE INSIGHTS
+    ========================== -->
+
+    <section class="insights-grid">
+
+
+      <!-- CONVERSION -->
+
+      <article class="insight-card">
+
+        <div class="insight-icon">
+
+          <lucide-icon
+            [img]="TrendingUp"
+            [size]="20"
+            [strokeWidth]="1.7">
+          </lucide-icon>
+
+        </div>
+
+
+        <div class="insight-content">
+
+          <span>
+            معدل التحويل
+          </span>
+
+          <strong>
+            {{ getConversionRate() }}%
+          </strong>
+
+          <small>
+            نسبة المحادثات التي نتج عنها طلب حجز
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- COMPLETED CHATS -->
+
+      <article class="insight-card">
+
+        <div class="insight-icon">
+
+          <lucide-icon
+            [img]="UserRoundCheck"
+            [size]="20"
+            [strokeWidth]="1.7">
+          </lucide-icon>
+
+        </div>
+
+
+        <div class="insight-content">
+
+          <span>
+            المحادثات المكتملة
+          </span>
+
+          <strong>
+            {{ stats.completed_chats || 0 }}
+          </strong>
+
+          <small>
+            {{ getCompletedChatsPercentage() }}%
+            من محادثات اليوم
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- TOP PLACE -->
+
+      <article class="insight-card">
+
+        <div class="insight-icon">
+
+          <lucide-icon
+            [img]="MapPin"
+            [size]="20"
+            [strokeWidth]="1.7">
+          </lucide-icon>
+
+        </div>
+
+
+        <div class="insight-content">
+
+          <span>
+            الأكثر طلبًا
+          </span>
+
+          <strong class="insight-text">
+            {{ getTopPlaceName() }}
+          </strong>
+
+          <small>
+            {{ stats.top_place_requests || 0 }}
+            طلب اليوم
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- DROPOFF -->
+
+      <article class="insight-card">
+
+        <div class="insight-icon">
+
+          <lucide-icon
+            [img]="Clock3"
+            [size]="20"
+            [strokeWidth]="1.7">
+          </lucide-icon>
+
+        </div>
+
+
+        <div class="insight-content">
+
+          <span>
+            أكثر نقطة توقف
+          </span>
+
+          <strong class="insight-text">
+            {{ getDropoffLabel() }}
+          </strong>
+
+          <small>
+            {{ stats.top_dropoff_count || 0 }}
+            محادثة
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================
+         REQUEST STATUS SUMMARY
+    ========================== -->
+
+    <section class="status-overview-card">
+
+      <div class="section-head">
+
+        <div>
+
+          <span class="section-label">
+            حالة الطلبات
+          </span>
+
+          <h2>
+            توزيع طلبات اليوم
+          </h2>
+
+          <p>
+            ملخص حالة طلبات الحجز المسجلة
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="request-status-grid">
+
+        <div class="request-summary-item">
+
+          <span>
+            طلبات جديدة
+          </span>
+
+          <strong>
+            {{ stats.pending_requests || 0 }}
+          </strong>
+
+        </div>
+
+
+        <div class="request-summary-item">
+
+          <span>
+            تم التأكيد
+          </span>
+
+          <strong>
+            {{ stats.confirmed_requests || 0 }}
+          </strong>
+
+        </div>
+
+
+        <div class="request-summary-item">
+
+          <span>
+            مكتملة
+          </span>
+
+          <strong>
+            {{ stats.completed_requests || 0 }}
+          </strong>
+
+        </div>
+
+
+        <div class="request-summary-item cancelled">
+
+          <span>
+            ملغاة
+          </span>
+
+          <strong>
+            {{ stats.cancelled_requests || 0 }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         RECENT CHATS
+    ========================== -->
+
+    <section class="dashboard-card">
+
+      <div class="section-head">
+
+        <div>
+
+          <span class="section-label">
+            المحادثات
+          </span>
+
+          <h2>
+            أحدث المحادثات
+          </h2>
+
+          <p>
+            متابعة آخر جلسات العملاء والمرحلة الحالية لكل محادثة
+          </p>
+
+        </div>
+
+
+        <span class="section-count">
+          {{ sessions.length }} محادثة
+        </span>
+
+      </div>
+
+
+      <div
+        *ngIf="sessions.length > 0"
+        class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>العميل</th>
+              <th>رقم الهاتف</th>
+              <th>المكان المختار</th>
+              <th>المرحلة الحالية</th>
+              <th>آخر رسالة</th>
+              <th>آخر نشاط</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let session of sessions;
+                trackBy: trackBySessionId
+              ">
+
+              <td>
+
+                <div class="customer-cell">
+
+                  <div class="customer-avatar">
+
+                    {{
+                      (session.name || '?')
+                        .charAt(0)
+                    }}
+
+                  </div>
+
+
+                  <div>
+
+                    <strong class="customer-name">
+
+                      {{
+                        session.name ||
+                        'غير مسجل'
+                      }}
+
+                    </strong>
+
+                    <small>
+                      عميل
+                    </small>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <td class="phone-cell">
+
+                {{
+                  session.phone ||
+                  'غير مسجل'
+                }}
+
+              </td>
+
+
+              <td>
+
+                {{
+                  session.selected_place_name ||
+                  'لم يتم الاختيار'
+                }}
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="step-badge"
+                  [class.completed]="
+                    session.status === 'completed'
+                  ">
+
+                  <span class="badge-dot"></span>
+
+                  {{
+                    getStepLabel(
+                      session.current_step
+                    )
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <div
+                  class="last-message"
+                  [title]="
+                    session.last_message || ''
+                  ">
+
+                  {{
+                    session.last_message ||
+                    'لا توجد رسالة'
+                  }}
+
+                </div>
+
+              </td>
+
+
+              <td class="date-cell">
+
+                {{
+                  session.last_activity_at
+                    | date:'dd/MM/yyyy - hh:mm a':'Africa/Cairo'
+                }}
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        *ngIf="sessions.length === 0"
+        class="empty-state">
+
+        لا توجد محادثات مسجلة حاليًا.
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         RECENT REQUESTS
+    ========================== -->
+
+    <section class="dashboard-card">
+
+      <div class="section-head">
+
+        <div>
+
+          <span class="section-label">
+            طلبات الحجز
+          </span>
+
+          <h2>
+            أحدث الطلبات
+          </h2>
+
+          <p>
+            آخر طلبات Day Use المسجلة من العملاء
+          </p>
+
+        </div>
+
+
+        <span class="section-count">
+          {{ requests.length }} طلب
+        </span>
+
+      </div>
+
+
+      <div
+        *ngIf="requests.length > 0"
+        class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>العميل</th>
+              <th>المكان</th>
+              <th>تاريخ الحجز</th>
+              <th>وقت الحجز</th>
+              <th>عدد الأفراد</th>
+              <th>الميزانية</th>
+              <th>الحالة</th>
+              <th>تاريخ إنشاء الطلب</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let request of requests;
+                trackBy: trackByRequestId
+              ">
+
+              <td>
+
+                <div class="customer-cell">
+
+                  <div class="customer-avatar">
+
+                    {{
+                      (request.name || '?')
+                        .charAt(0)
+                    }}
+
+                  </div>
+
+
+                  <div>
+
+                    <strong class="customer-name">
+                      {{ request.name || 'غير مسجل' }}
+                    </strong>
+
+                    <small class="customer-phone">
+                      {{ request.phone || 'غير مسجل' }}
+                    </small>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <td>
+                {{ request.place_name || 'غير محدد' }}
+              </td>
+
+
+              <td class="date-cell">
+
+                {{
+                  request.date
+                    ? (request.date | date:'dd/MM/yyyy')
+                    : 'غير محدد'
+                }}
+
+              </td>
+
+
+              <td>
+
+                {{
+                  request.time ||
+                  'غير محدد'
+                }}
+
+              </td>
+
+
+              <td>
+
+                {{
+                  request.guests ||
+                  'غير محدد'
+                }}
+
+              </td>
+
+
+              <td>
+
+                <strong
+                  *ngIf="request.budget"
+                  class="price">
+
+                  {{ request.budget | number }}
+                  جنيه
+
+                </strong>
+
+                <span
+                  *ngIf="!request.budget"
+                  class="missing-value">
+
+                  غير محددة
+
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="request-status"
+                  [attr.data-status]="request.status">
+
+                  <span class="badge-dot"></span>
+
+                  {{
+                    getRequestStatusLabel(
+                      request.status
+                    )
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <td class="date-cell">
+
+                {{
+                  request.created_at
+                    | date:'dd/MM/yyyy - hh:mm a':'Africa/Cairo'
+                }}
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        *ngIf="requests.length === 0"
+        class="empty-state">
+
+        لا توجد طلبات حجز مسجلة حاليًا.
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

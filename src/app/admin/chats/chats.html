@@ -1,0 +1,998 @@
+<div class="chats-page" dir="rtl">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="page-intro">
+
+    <div>
+
+      <span class="page-label">
+        مركز خدمة العملاء
+      </span>
+
+      <h2>
+        إدارة المحادثات
+      </h2>
+
+      <p>
+        متابعة جلسات العملاء، مراحل التفاعل، واختيارات الحجز
+      </p>
+
+    </div>
+
+
+    <div class="page-summary">
+
+      <span>
+        النتائج الحالية
+      </span>
+
+      <strong>
+        {{ filteredSessions.length }}
+      </strong>
+
+      <small>
+        من {{ sessions.length }} محادثة
+      </small>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       KPI SUMMARY
+  ====================================================== -->
+
+  <section class="conversation-stats">
+
+    <article class="conversation-stat">
+
+      <div class="stat-icon">
+
+        <lucide-icon
+          [img]="MessagesSquare"
+          [size]="20"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </div>
+
+      <div>
+
+        <span>
+          إجمالي المحادثات
+        </span>
+
+        <strong>
+          {{ totalSessions }}
+        </strong>
+
+        <small>
+          جميع الجلسات المسجلة
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="conversation-stat">
+
+      <div class="stat-icon">
+
+        <lucide-icon
+          [img]="CircleCheckBig"
+          [size]="20"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </div>
+
+      <div>
+
+        <span>
+          المحادثات المكتملة
+        </span>
+
+        <strong>
+          {{ completedSessions }}
+        </strong>
+
+        <small>
+          وصلت إلى تسجيل طلب
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="conversation-stat">
+
+      <div class="stat-icon">
+
+        <lucide-icon
+          [img]="Clock3"
+          [size]="20"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </div>
+
+      <div>
+
+        <span>
+          قيد المتابعة
+        </span>
+
+        <strong>
+          {{ activeSessions }}
+        </strong>
+
+        <small>
+          لم تستكمل حتى الآن
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="conversation-stat">
+
+      <div class="stat-icon">
+
+        <lucide-icon
+          [img]="MapPinned"
+          [size]="20"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </div>
+
+      <div>
+
+        <span>
+          تم اختيار مكان
+        </span>
+
+        <strong>
+          {{ sessionsWithPlace }}
+        </strong>
+
+        <small>
+          جلسات وصلت لمرحلة الاختيار
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       SEARCH / FILTERS
+  ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="filters-title">
+
+      <div class="filters-icon">
+
+        <lucide-icon
+          [img]="SlidersHorizontal"
+          [size]="17"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </div>
+
+      <div>
+
+        <strong>
+          البحث والتصفية
+        </strong>
+
+        <span>
+          تصفية المحادثات حسب بيانات العميل أو حالة اختيار المكان
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="16"
+        [strokeWidth]="1.8">
+      </lucide-icon>
+
+      <input
+        type="text"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="البحث بالاسم، رقم الهاتف أو المكان">
+
+    </div>
+
+
+    <div class="filters-row">
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')">
+
+        <span>
+          جميع المحادثات
+        </span>
+
+        <strong>
+          {{ getFilterCount('all') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'with-name'"
+        (click)="setFilter('with-name')">
+
+        <span>
+          بيانات عميل مسجلة
+        </span>
+
+        <strong>
+          {{ getFilterCount('with-name') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'without-name'"
+        (click)="setFilter('without-name')">
+
+        <span>
+          بدون بيانات عميل
+        </span>
+
+        <strong>
+          {{ getFilterCount('without-name') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'with-place'"
+        (click)="setFilter('with-place')">
+
+        <span>
+          تم اختيار مكان
+        </span>
+
+        <strong>
+          {{ getFilterCount('with-place') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'without-place'"
+        (click)="setFilter('without-place')">
+
+        <span>
+          لم يتم اختيار مكان
+        </span>
+
+        <strong>
+          {{ getFilterCount('without-place') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        *ngIf="activeFilter !== 'all' || searchTerm"
+        type="button"
+        class="clear-button"
+        (click)="clearFilters()">
+
+        إعادة ضبط
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل بيانات المحادثات...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       TABLE
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="sessions-card">
+
+    <div class="table-head">
+
+      <div>
+
+        <span class="section-label">
+          سجل المحادثات
+        </span>
+
+        <h3>
+          أحدث جلسات العملاء
+        </h3>
+
+        <p>
+          {{ filteredSessions.length }}
+          محادثة مطابقة لمعايير البحث الحالية
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="filteredSessions.length === 0"
+      class="empty-state">
+
+      لا توجد محادثات مطابقة لمعايير البحث الحالية.
+
+    </div>
+
+
+    <div
+      *ngIf="filteredSessions.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              العميل
+            </th>
+
+            <th>
+              رقم الهاتف
+            </th>
+
+            <th>
+              المكان المختار
+            </th>
+
+            <th>
+              مرحلة المحادثة
+            </th>
+
+            <th>
+              آخر نشاط
+            </th>
+
+            <th class="action-column">
+              الإجراءات
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let session of paginatedSessions;
+              trackBy: trackBySessionId
+            ">
+
+            <!-- CUSTOMER -->
+            <td>
+
+              <div class="customer-cell">
+
+                <div class="customer-avatar">
+
+                  {{
+                    (session.name || '?')
+                      .charAt(0)
+                  }}
+
+                </div>
+
+
+                <div>
+
+                  <strong>
+
+                    {{
+                      session.name ||
+                      'عميل غير مسجل'
+                    }}
+
+                  </strong>
+
+                  <small>
+
+                    {{
+                      session.phone
+                        ? 'بيانات التواصل متاحة'
+                        : 'بيانات التواصل غير مكتملة'
+                    }}
+
+                  </small>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- PHONE -->
+            <td class="phone-cell">
+
+              {{
+                session.phone ||
+                'غير مسجل'
+              }}
+
+            </td>
+
+
+            <!-- PLACE -->
+            <td>
+
+              <span
+                *ngIf="session.selected_place_name"
+                class="place-name">
+
+                {{
+                  session.selected_place_name
+                }}
+
+              </span>
+
+
+              <span
+                *ngIf="!session.selected_place_name"
+                class="missing-value">
+
+                لم يتم الاختيار
+
+              </span>
+
+            </td>
+
+
+            <!-- STEP -->
+            <td>
+
+              <span
+                class="step-badge"
+                [class.completed]="session.status === 'completed'">
+
+                <span class="badge-dot"></span>
+
+                {{
+                  getStepLabel(
+                    session.current_step
+                  )
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- LAST ACTIVITY -->
+            <td class="date-cell">
+
+              {{
+                session.last_activity_at
+                  | date:'dd/MM/yyyy - hh:mm a':'Africa/Cairo'
+              }}
+
+            </td>
+
+
+            <!-- ACTION -->
+            <td class="action-column">
+
+              <button
+                type="button"
+                class="open-button"
+                (click)="openSession(session)">
+
+                <lucide-icon
+                  [img]="Eye"
+                  [size]="14"
+                  [strokeWidth]="1.8">
+                </lucide-icon>
+
+                <!-- <span>
+                  فتح التفاصيل
+                </span> -->
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+    ====================================================== -->
+
+    <div
+      *ngIf="filteredSessions.length > 0"
+      class="pagination">
+
+      <div class="pagination-info">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        إلى
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredSessions.length }}
+        </strong>
+
+        محادثة
+
+      </div>
+
+
+      <div class="pagination-controls">
+
+        <button
+          type="button"
+          class="page-nav"
+          [disabled]="currentPage === 1"
+          (click)="previousPage()">
+
+          <lucide-icon
+            [img]="ChevronRight"
+            [size]="15"
+            [strokeWidth]="1.8">
+          </lucide-icon>
+
+          <span>
+            السابق
+          </span>
+
+        </button>
+
+
+        <div class="current-page">
+
+          <span>
+            الصفحة
+          </span>
+
+          <strong>
+            {{ currentPage }}
+          </strong>
+
+          <span>
+            من {{ totalPages }}
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="page-nav"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+
+          <span>
+            التالي
+          </span>
+
+          <lucide-icon
+            [img]="ChevronLeft"
+            [size]="15"
+            [strokeWidth]="1.8">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       CONVERSATION DRAWER
+  ====================================================== -->
+
+  <div
+    *ngIf="selectedSession"
+    class="session-overlay"
+    (click)="closeSession()">
+
+    <aside
+      class="session-panel"
+      (click)="$event.stopPropagation()">
+
+      <!-- DRAWER HEADER -->
+      <div class="session-panel-head">
+
+        <div class="drawer-customer">
+
+          <div class="drawer-avatar">
+
+            {{
+              (selectedSession.name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+
+          <div>
+
+            <span class="drawer-label">
+              تفاصيل المحادثة
+            </span>
+
+            <h3>
+
+              {{
+                selectedSession.name ||
+                'عميل غير مسجل'
+              }}
+
+            </h3>
+
+            <p>
+
+              {{
+                selectedSession.phone ||
+                'رقم الهاتف غير مسجل'
+              }}
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeSession()">
+
+          إغلاق
+
+        </button>
+
+      </div>
+
+
+      <!-- SESSION SUMMARY -->
+      <div class="session-summary">
+
+        <div>
+
+          <span>
+            حالة المحادثة
+          </span>
+
+          <strong>
+
+            {{
+              getSessionStatusLabel(
+                selectedSession
+              )
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            المرحلة الحالية
+          </span>
+
+          <strong>
+
+            {{
+              getStepLabel(
+                selectedSession.current_step
+              )
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- CUSTOMER INFO -->
+      <div class="session-meta">
+
+        <div>
+
+          <span>
+            المكان المختار
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.selected_place_name
+                || 'لم يتم الاختيار'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            عدد الأفراد
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.guests ||
+              'غير محدد'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            ميزانية العميل للفرد
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.budget
+                ? (selectedSession.budget | number) + ' جنيه'
+                : 'غير محددة'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            المنطقة المطلوبة
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.area ||
+              'غير محددة'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            عدد الرسائل
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.messages_count ||
+              0
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            آخر نشاط
+          </span>
+
+          <strong>
+
+            {{
+              selectedSession.last_activity_at
+                | date:'dd/MM/yyyy - hh:mm a':'Africa/Cairo'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- CONVERSATION TITLE -->
+      <div class="conversation-head">
+
+        <div>
+
+          <span>
+            سجل الرسائل
+          </span>
+
+          <strong>
+            تفاصيل التفاعل مع العميل
+          </strong>
+
+        </div>
+
+        <small>
+          {{ messages.length }} رسالة
+        </small>
+
+      </div>
+
+
+      <!-- LOADING -->
+      <div
+        *ngIf="messagesLoading"
+        class="messages-state">
+
+        جاري تحميل سجل الرسائل...
+
+      </div>
+
+
+      <!-- MESSAGES -->
+      <div
+        *ngIf="!messagesLoading"
+        class="conversation">
+
+        <div
+          *ngIf="messages.length === 0"
+          class="messages-state">
+
+          لا توجد رسائل مسجلة لهذه الجلسة.
+
+        </div>
+
+
+        <div
+          *ngFor="
+            let message of messages;
+            trackBy: trackByMessageId
+          "
+          class="message"
+          [class.user]="message.sender === 'user'"
+          [class.bot]="message.sender === 'bot'">
+
+          <div class="message-sender">
+
+            <strong>
+
+              {{
+                message.sender === 'user'
+                  ? 'العميل'
+                  : 'Tasahel Assistant'
+              }}
+
+            </strong>
+
+
+            <span>
+
+              {{
+                message.created_at
+                  | date:'hh:mm a':'Africa/Cairo'
+              }}
+
+            </span>
+
+          </div>
+
+
+          <div class="message-text">
+
+            {{ message.message }}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>

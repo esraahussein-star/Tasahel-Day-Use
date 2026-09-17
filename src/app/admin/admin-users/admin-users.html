@@ -1,0 +1,679 @@
+<div
+  class="users-page"
+  dir="rtl">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <section class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        إدارة النظام
+      </span>
+
+      <h1>
+        إدارة المستخدمين
+      </h1>
+
+      <p>
+        إدارة حسابات فريق العمل والصلاحيات.
+      </p>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <div class="users-total">
+
+        <span>
+          إجمالي المستخدمين
+        </span>
+
+        <strong>
+          {{ users.length }}
+        </strong>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="add-user-button"
+        (click)="openCreateModal()">
+
+        <lucide-icon
+          [img]="Plus"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          إضافة مستخدم
+        </span>
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       PAGE MESSAGES
+  ====================================================== -->
+
+  <div
+    *ngIf="successMessage"
+    class="success-message">
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="errorMessage && !showUserModal"
+    class="page-error-message">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="16">
+      </lucide-icon>
+
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="البحث بالاسم أو البريد الإلكتروني...">
+
+    </div>
+
+
+    <select
+      [(ngModel)]="roleFilter">
+
+      <option value="all">
+        كل الأدوار
+      </option>
+
+      <option value="admin">
+        Admin
+      </option>
+
+      <option value="manager">
+        Manager
+      </option>
+
+      <option value="agent">
+        Agent
+      </option>
+
+      <option value="account">
+        Account
+      </option>
+
+    </select>
+
+
+    <select
+      [(ngModel)]="statusFilter">
+
+      <option value="all">
+        كل الحالات
+      </option>
+
+      <option value="active">
+        النشط
+      </option>
+
+      <option value="inactive">
+        غير النشط
+      </option>
+
+    </select>
+
+  </section>
+
+
+  <!-- =====================================================
+       USERS TABLE
+  ====================================================== -->
+
+  <section class="users-card">
+
+    <div
+      *ngIf="loading"
+      class="state-box">
+
+      جاري تحميل المستخدمين...
+
+    </div>
+
+
+    <div
+      *ngIf="
+        !loading &&
+        filteredUsers.length === 0
+      "
+      class="state-box">
+
+      لا توجد نتائج مطابقة.
+
+    </div>
+
+
+    <div
+      *ngIf="
+        !loading &&
+        filteredUsers.length > 0
+      "
+      class="users-table">
+
+
+      <div class="table-head">
+
+        <span>
+          المستخدم
+        </span>
+
+        <span>
+          البريد الإلكتروني
+        </span>
+
+        <span>
+          الدور
+        </span>
+
+        <span>
+          سعة الوكيل
+        </span>
+
+        <span>
+          آخر تعديل
+        </span>
+
+        <span class="center-col">
+          الحالة
+        </span>
+
+        <span class="center-col">
+          الإجراءات
+        </span>
+
+      </div>
+
+
+      <div
+        *ngFor="
+          let user of filteredUsers;
+          trackBy: trackByUserId
+        "
+        class="user-row">
+
+        <!-- USER -->
+
+        <div class="user-info">
+
+          <div class="avatar">
+            {{
+              (user.full_name || '?')
+                .charAt(0)
+            }}
+          </div>
+
+          <div>
+
+            <strong>
+              {{ user.full_name || 'بدون اسم' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- EMAIL -->
+
+        <div class="email-cell">
+          {{ user.email || '-' }}
+        </div>
+
+
+        <!-- ROLE -->
+
+        <div>
+
+          <span
+            class="role-badge"
+            [attr.data-role]="user.role">
+
+            {{ getRoleLabel(user.role) }}
+
+          </span>
+
+        </div>
+
+
+        <!-- CAPACITY -->
+
+        <div class="capacity-cell">
+
+          <ng-container
+            *ngIf="
+              user.role === 'agent';
+              else noCapacity
+            ">
+
+            <strong>
+              {{ user.max_active_requests || 10 }}
+              /
+              {{ user.max_open_requests || 10 }}
+            </strong>
+
+          </ng-container>
+
+          <ng-template #noCapacity>
+            <span>-</span>
+          </ng-template>
+
+        </div>
+
+
+        <!-- UPDATED -->
+
+        <div class="date-cell">
+          {{ formatDate(user.updated_at) }}
+        </div>
+
+
+        <!-- STATUS DOT ONLY -->
+
+        <div class="status-cell">
+
+          <span
+            class="status-dot"
+            [class.active]="user.active"
+            [title]="
+              user.active
+                ? 'نشط'
+                : 'غير نشط'
+            ">
+          </span>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions-cell">
+
+          <button
+            type="button"
+            class="icon-button"
+            title="تعديل المستخدم"
+            (click)="editUser(user)">
+
+            <lucide-icon
+              [img]="Pencil"
+              [size]="15">
+            </lucide-icon>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="icon-button power"
+            [class.inactive]="!user.active"
+            [title]="
+              user.active
+                ? 'إيقاف المستخدم'
+                : 'تفعيل المستخدم'
+            "
+            (click)="toggleActive(user)">
+
+            <lucide-icon
+              [img]="Power"
+              [size]="15">
+            </lucide-icon>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       CREATE / EDIT MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="showUserModal"
+    class="modal-backdrop"
+    (click)="closeUserModal()">
+
+    <section
+      class="user-modal"
+      (click)="$event.stopPropagation()">
+
+
+      <!-- HEADER -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            {{
+              modalMode === 'create'
+                ? 'إضافة مستخدم جديد'
+                : 'تعديل المستخدم'
+            }}
+          </h2>
+
+          <p>
+            {{
+              modalMode === 'create'
+                ? 'أنشئي حساب جديد وحددي الصلاحية.'
+                : 'عدلي بيانات المستخدم أو غيّري كلمة المرور.'
+            }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="modal-close"
+          [disabled]="saving"
+          (click)="closeUserModal()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="18">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <!-- ERROR -->
+
+      <div
+        *ngIf="errorMessage"
+        class="modal-error">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <!-- FORM -->
+
+      <div class="modal-form">
+
+        <label>
+
+          <span>
+            الاسم الكامل
+          </span>
+
+          <input
+            type="text"
+            [(ngModel)]="form.full_name"
+            placeholder="مثال: محمد أحمد">
+
+        </label>
+
+
+        <label>
+
+          <span>
+            البريد الإلكتروني
+          </span>
+
+          <input
+            type="email"
+            [(ngModel)]="form.email"
+            [disabled]="modalMode === 'edit'"
+            placeholder="example@tasahel.com">
+
+        </label>
+
+
+        <label>
+
+          <span>
+            الدور
+          </span>
+
+          <select
+            [(ngModel)]="form.role">
+
+            <option value="agent">
+              Agent
+            </option>
+
+            <option value="account">
+              Account
+            </option>
+
+            <option value="manager">
+              Manager
+            </option>
+
+            <option value="admin">
+              Admin
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label class="password-field">
+
+          <span>
+            {{
+              modalMode === 'create'
+                ? 'كلمة المرور'
+                : 'كلمة مرور جديدة'
+            }}
+          </span>
+
+
+          <div class="password-control">
+
+            <input
+              [type]="
+                showPassword
+                  ? 'text'
+                  : 'password'
+              "
+              [(ngModel)]="form.password"
+              [placeholder]="
+                modalMode === 'edit'
+                  ? 'اتركيه فارغًا بدون تغيير'
+                  : 'كلمة المرور'
+              ">
+
+
+            <button
+              type="button"
+              class="field-icon-button"
+              title="إظهار / إخفاء"
+              (click)="togglePasswordVisibility()">
+
+              <lucide-icon
+                [img]="
+                  showPassword
+                    ? EyeOff
+                    : Eye
+                "
+                [size]="15">
+              </lucide-icon>
+
+            </button>
+
+
+            <button
+              type="button"
+              class="field-icon-button"
+              title="توليد كلمة مرور"
+              (click)="generatePassword()">
+
+              <lucide-icon
+                [img]="RefreshCw"
+                [size]="15">
+              </lucide-icon>
+
+            </button>
+
+
+            <button
+              type="button"
+              class="field-icon-button"
+              title="نسخ كلمة المرور"
+              [disabled]="!form.password"
+              (click)="copyPassword()">
+
+              <lucide-icon
+                [img]="Copy"
+                [size]="15">
+              </lucide-icon>
+
+            </button>
+
+          </div>
+
+
+          <small
+            *ngIf="copiedPassword"
+            class="password-copied">
+
+            تم النسخ ✓
+
+          </small>
+
+
+          <small
+            *ngIf="modalMode === 'edit'"
+            class="password-note">
+
+            اتركي الحقل فارغًا لو مش عايزة تغيري كلمة المرور.
+
+          </small>
+
+        </label>
+
+      </div>
+
+
+      <!-- AGENT SETTINGS -->
+
+      <div
+        *ngIf="form.role === 'agent'"
+        class="agent-settings">
+
+        <div class="agent-settings-title">
+
+          <strong>
+            إعدادات الوكيل
+          </strong>
+
+        </div>
+
+
+        <div class="agent-settings-grid">
+
+          <label>
+
+            <span>
+              الحد الأقصى للطلبات المفتوحة
+            </span>
+
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="form.max_open_requests">
+
+          </label>
+
+
+          <label>
+
+            <span>
+              الحد الأقصى للطلبات النشطة
+            </span>
+
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="form.max_active_requests">
+
+          </label>
+
+        </div>
+
+      </div>
+
+
+      <!-- FOOTER -->
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeUserModal()">
+
+          إلغاء
+
+        </button>
+
+
+        <button
+          type="button"
+          class="submit-button"
+          [disabled]="saving"
+          (click)="saveUser()">
+
+          {{
+            saving
+              ? 'جاري الحفظ...'
+              : modalMode === 'create'
+                ? 'إنشاء المستخدم'
+                : 'حفظ التعديلات'
+          }}
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>

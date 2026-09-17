@@ -1,0 +1,1121 @@
+<div class="assignments-page" dir="rtl">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="assignments-header">
+
+    <div class="header-copy">
+
+      <span class="header-label">
+        إدارة التوزيع
+      </span>
+
+      <h1>
+        توزيع الطلبات
+      </h1>
+
+      <p>
+        متابعة الطلبات غير المسندة، توزيع المهام على الفريق ومراقبة حالة التنفيذ.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       KPI SUMMARY
+  ====================================================== -->
+
+  <section class="assignment-stats">
+
+    <article class="assignment-stat">
+
+      <span>
+        إجمالي الطلبات
+      </span>
+
+      <strong>
+        {{ totalRequests }}
+      </strong>
+
+      <small>
+        جميع الطلبات الحالية
+      </small>
+
+    </article>
+
+
+    <article class="assignment-stat warning">
+
+      <span>
+        غير مسندة
+      </span>
+
+      <strong>
+        {{ unassignedCount }}
+      </strong>
+
+      <small>
+        تحتاج إلى توزيع
+      </small>
+
+    </article>
+
+
+    <article class="assignment-stat">
+
+      <span>
+        تم الإسناد
+      </span>
+
+      <strong>
+        {{ assignedCount }}
+      </strong>
+
+      <small>
+        تم تعيين مسؤول عليها
+      </small>
+
+    </article>
+
+
+    <article class="assignment-stat">
+
+      <span>
+        قيد التنفيذ
+      </span>
+
+      <strong>
+        {{ inProgressCount }}
+      </strong>
+
+      <small>
+        جاري التعامل معها
+      </small>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       SEARCH
+  ====================================================== -->
+
+  <section class="search-card">
+
+    <div class="search-area">
+
+      <div class="search-icon">
+        ⌕
+      </div>
+
+      <input
+        type="text"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="البحث باسم العميل، رقم الهاتف، المكان أو الموظف المسؤول">
+
+      <div class="search-count">
+
+        <strong>
+          {{ filteredRows.length }}
+        </strong>
+
+        <span>
+          نتيجة
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="filters-section">
+
+    <div class="status-filters">
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')">
+
+        <span>
+          الكل
+        </span>
+
+        <strong>
+          {{ getFilterCount('all') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'unassigned'"
+        (click)="setFilter('unassigned')">
+
+        <span>
+          غير مسندة
+        </span>
+
+        <strong>
+          {{ getFilterCount('unassigned') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'assigned'"
+        (click)="setFilter('assigned')">
+
+        <span>
+          تم الإسناد
+        </span>
+
+        <strong>
+          {{ getFilterCount('assigned') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'in_progress'"
+        (click)="setFilter('in_progress')">
+
+        <span>
+          قيد التنفيذ
+        </span>
+
+        <strong>
+          {{ getFilterCount('in_progress') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'completed'"
+        (click)="setFilter('completed')">
+
+        <span>
+          مكتملة
+        </span>
+
+        <strong>
+          {{ getFilterCount('completed') }}
+        </strong>
+
+      </button>
+
+    </div>
+
+
+    <div class="agent-filter">
+
+      <select
+        [ngModel]="selectedAgentFilter"
+        (ngModelChange)="setAgentFilter($event)">
+
+        <option value="">
+          جميع الموظفين
+        </option>
+
+        <option
+          *ngFor="
+            let agent of agents;
+            trackBy: trackByAgentId
+          "
+          [value]="agent.id">
+
+          {{ agent.full_name }}
+
+        </option>
+
+      </select>
+
+
+      <button
+        *ngIf="
+          activeFilter !== 'all' ||
+          selectedAgentFilter ||
+          searchTerm
+        "
+        type="button"
+        class="reset-button"
+        (click)="clearFilters()">
+
+        إعادة ضبط
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل بيانات توزيع الطلبات...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       ASSIGNMENTS TABLE
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="assignments-card">
+
+    <div class="table-head">
+
+      <div>
+
+        <span class="section-label">
+          قائمة التوزيع
+        </span>
+
+        <h2>
+          الطلبات الحالية
+        </h2>
+
+        <p>
+          {{ filteredRows.length }}
+          طلب مطابق لمعايير البحث الحالية
+        </p>
+
+      </div>
+
+
+      <div
+        *ngIf="filteredRows.length > 0"
+        class="result-range">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        -
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredRows.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      *ngIf="filteredRows.length === 0"
+      class="empty-state">
+
+      <div class="empty-icon">
+        ✓
+      </div>
+
+      <strong>
+        لا توجد طلبات مطابقة
+      </strong>
+
+      <p>
+        لا توجد نتائج وفقًا لمعايير البحث أو التصفية الحالية.
+      </p>
+
+      <button
+        type="button"
+        (click)="clearFilters()">
+
+        عرض جميع الطلبات
+
+      </button>
+
+    </div>
+
+
+    <!-- TABLE -->
+    <div
+      *ngIf="filteredRows.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              العميل
+            </th>
+
+            <th>
+              المكان
+            </th>
+
+            <th>
+              موعد الحجز
+            </th>
+
+            <th>
+              الموظف المسؤول
+            </th>
+
+            <th>
+              حالة الإسناد
+            </th>
+
+            <th>
+              نوع الإسناد
+            </th>
+
+            <th class="action-column">
+              الإجراءات
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let row of paginatedRows;
+              trackBy: trackByRequestId
+            "
+            [class.unassigned-row]="!row.assignment">
+
+            <!-- CUSTOMER -->
+            <td>
+
+              <div class="customer-cell">
+
+                <div class="customer-avatar">
+
+                  {{
+                    (row.name || '?')
+                      .charAt(0)
+                  }}
+
+                </div>
+
+
+                <div>
+
+                  <strong>
+
+                    {{
+                      row.name ||
+                      'عميل غير مسجل'
+                    }}
+
+                  </strong>
+
+                  <small>
+
+                    {{
+                      row.phone ||
+                      'رقم الهاتف غير مسجل'
+                    }}
+
+                  </small>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- PLACE -->
+            <td>
+
+              <span class="place-name">
+
+                {{
+                  row.place_name ||
+                  'لم يتم تحديد المكان'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- BOOKING DATE -->
+            <td>
+
+              <div class="booking-cell">
+
+                <strong>
+
+                  {{
+                    row.date
+                      ? (row.date | date:'dd/MM/yyyy')
+                      : 'غير محدد'
+                  }}
+
+                </strong>
+
+                <small>
+
+                  {{
+                    row.time ||
+                    'الوقت غير محدد'
+                  }}
+
+                </small>
+
+              </div>
+
+            </td>
+
+
+            <!-- AGENT -->
+            <td>
+
+              <ng-container
+                *ngIf="row.assigned_agent; else noAgent">
+
+                <div class="agent-cell">
+
+                  <div class="agent-avatar">
+
+                    {{
+                      row.assigned_agent.full_name
+                        .charAt(0)
+                    }}
+
+                  </div>
+
+
+                  <div>
+
+                    <strong>
+                      {{ row.assigned_agent.full_name }}
+                    </strong>
+
+                    <small>
+                      موظف خدمة العملاء
+                    </small>
+
+                  </div>
+
+                </div>
+
+              </ng-container>
+
+
+              <ng-template #noAgent>
+
+                <span class="unassigned-badge">
+                  غير مسند
+                </span>
+
+              </ng-template>
+
+            </td>
+
+
+            <!-- STATUS -->
+            <td>
+
+              <span
+                class="assignment-status"
+                [attr.data-status]="row.assignment?.status || 'unassigned'">
+
+                <span class="status-dot"></span>
+
+                {{
+                  row.assignment
+                    ? getAssignmentStatusLabel(
+                        row.assignment.status
+                      )
+                    : 'غير مسند'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- TYPE -->
+            <td>
+
+              <span
+                *ngIf="row.assignment"
+                class="assignment-type"
+                [class.auto]="row.assignment.assignment_type === 'auto'">
+
+                {{
+                  row.assignment.assignment_type === 'auto'
+                    ? 'تلقائي'
+                    : 'يدوي'
+                }}
+
+              </span>
+
+
+              <span
+                *ngIf="!row.assignment"
+                class="missing-value">
+
+                —
+
+              </span>
+
+            </td>
+
+
+            <!-- ACTION -->
+           <td class="action-column">
+
+  <div class="assignment-actions">
+
+    <button
+      *ngIf="!row.assignment"
+      type="button"
+      class="auto-assign-button"
+      [disabled]="autoAssigningRequestId === row.id"
+      (click)="autoAssign(row)">
+
+      {{
+        autoAssigningRequestId === row.id
+          ? 'جاري التوزيع...'
+          : 'توزيع تلقائي'
+      }}
+
+    </button>
+
+
+    <button
+      type="button"
+      class="assign-button"
+      [class.reassign]="row.assignment"
+      (click)="openAssign(row)">
+
+      {{
+        row.assignment
+          ? 'تغيير المسؤول'
+          : 'إسناد يدوي'
+      }}
+
+    </button>
+
+  </div>
+
+</td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+    ====================================================== -->
+
+    <div
+      *ngIf="filteredRows.length > 0"
+      class="pagination">
+
+      <div class="pagination-info">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        إلى
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredRows.length }}
+        </strong>
+
+        طلب
+
+      </div>
+
+
+      <div class="pagination-controls">
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="currentPage === 1"
+          (click)="previousPage()">
+
+          السابق
+
+        </button>
+
+
+        <div class="page-number">
+
+          <span>
+            الصفحة
+          </span>
+
+          <strong>
+            {{ currentPage }}
+          </strong>
+
+          <span>
+            من {{ totalPages }}
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+
+          التالي
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ASSIGNMENT DRAWER
+  ====================================================== -->
+
+  <div
+    *ngIf="drawerOpen && selectedRequest"
+    class="assignment-overlay"
+    (click)="closeDrawer()">
+
+    <aside
+      class="assignment-panel"
+      (click)="$event.stopPropagation()">
+
+      <!-- HEADER -->
+      <header class="panel-header">
+
+        <div>
+
+          <span class="panel-label">
+            توزيع الطلب
+          </span>
+
+          <h2>
+
+            {{
+              getActiveAssignment(selectedRequest.id)
+                ? 'تغيير الموظف المسؤول'
+                : 'إسناد الطلب'
+            }}
+
+          </h2>
+
+          <p>
+            اختيار الموظف المناسب وفقًا للحمل التشغيلي الحالي.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="panel-close"
+          [disabled]="saving"
+          (click)="closeDrawer()">
+
+          ✕
+
+        </button>
+
+      </header>
+
+
+      <!-- BODY -->
+      <div class="panel-body">
+
+        <div
+          *ngIf="assignError"
+          class="form-error">
+
+          {{ assignError }}
+
+        </div>
+
+
+        <!-- REQUEST SUMMARY -->
+        <section class="request-summary">
+
+          <span class="summary-label">
+            الطلب
+          </span>
+
+
+          <div class="request-customer">
+
+            <div class="summary-avatar">
+
+              {{
+                (selectedRequest.name || '?')
+                  .charAt(0)
+              }}
+
+            </div>
+
+
+            <div>
+
+              <strong>
+
+                {{
+                  selectedRequest.name ||
+                  'عميل غير مسجل'
+                }}
+
+              </strong>
+
+              <span>
+
+                {{
+                  selectedRequest.phone ||
+                  'رقم الهاتف غير مسجل'
+                }}
+
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="request-summary-grid">
+
+            <div>
+
+              <span>
+                المكان
+              </span>
+
+              <strong>
+                {{
+                  selectedRequest.place_name ||
+                  'غير محدد'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                عدد الأفراد
+              </span>
+
+              <strong>
+                {{ selectedRequest.guests || 0 }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                التاريخ
+              </span>
+
+              <strong>
+
+                {{
+                  selectedRequest.date
+                    ? (
+                        selectedRequest.date
+                          | date:'dd/MM/yyyy'
+                      )
+                    : 'غير محدد'
+                }}
+
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                الوقت
+              </span>
+
+              <strong>
+                {{
+                  selectedRequest.time ||
+                  'غير محدد'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- AGENT SELECT -->
+        <section class="drawer-section">
+
+          <div class="drawer-section-head">
+
+            <span>
+              الموظف المسؤول
+            </span>
+
+            <strong>
+              اختيار عضو الفريق
+            </strong>
+
+          </div>
+
+
+          <div
+            *ngIf="agents.length === 0"
+            class="agents-empty">
+
+            لا يوجد موظفو خدمة عملاء نشطون حاليًا.
+
+          </div>
+
+
+          <div
+            *ngIf="agents.length > 0"
+            class="agents-list">
+
+            <label
+              *ngFor="
+                let agent of agents;
+                trackBy: trackByAgentId
+              "
+              class="agent-option"
+              [class.selected]="selectedAgentId === agent.id"
+              [class.unavailable]="
+                !isAgentAvailable(agent) &&
+                selectedAgentId !== agent.id
+              ">
+
+              <input
+                type="radio"
+                name="assigned-agent"
+                [value]="agent.id"
+                [(ngModel)]="selectedAgentId"
+                [disabled]="
+                  !isAgentAvailable(agent) &&
+                  selectedAgentId !== agent.id
+                ">
+
+
+              <div class="agent-option-avatar">
+
+                {{
+                  (agent.full_name || '?')
+                    .charAt(0)
+                }}
+
+              </div>
+
+
+              <div class="agent-option-main">
+
+                <strong>
+                  {{ agent.full_name }}
+                </strong>
+
+                <span>
+                  {{ agent.email }}
+                </span>
+
+              </div>
+
+
+              <div class="agent-capacity">
+
+                <span>
+                  الحمل الحالي
+                </span>
+
+                <strong>
+
+                  {{
+                    getAgentActiveCount(agent.id)
+                  }}
+
+                  /
+
+                  {{
+                    getAgentCapacity(agent)
+                  }}
+
+                </strong>
+
+                <small>
+
+                  {{
+                    getAgentRemainingCapacity(agent)
+                  }}
+
+                  متاح
+
+                </small>
+
+              </div>
+
+            </label>
+
+          </div>
+
+        </section>
+
+
+        <!-- REASON -->
+        <section class="drawer-section">
+
+          <div class="drawer-section-head">
+
+            <span>
+              تفاصيل إضافية
+            </span>
+
+            <strong>
+              سبب أو ملاحظة الإسناد
+            </strong>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              ملاحظة
+            </label>
+
+            <textarea
+              [(ngModel)]="assignmentReason"
+              rows="5"
+              placeholder="يمكن إضافة ملاحظة داخلية بخصوص الإسناد">
+            </textarea>
+
+            <small>
+              هذا الحقل اختياري ويظهر للإدارة فقط.
+            </small>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- FOOTER -->
+      <footer class="panel-footer">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeDrawer()">
+
+          إلغاء
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving || !selectedAgentId"
+          (click)="saveAssignment()">
+
+          {{
+            saving
+              ? 'جاري الحفظ...'
+              : (
+                  getActiveAssignment(selectedRequest.id)
+                    ? 'حفظ تغيير المسؤول'
+                    : 'تأكيد الإسناد'
+                )
+          }}
+
+        </button>
+
+      </footer>
+
+    </aside>
+
+  </div>
+
+</div>

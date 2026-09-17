@@ -1,0 +1,446 @@
+<div class="admin-shell" dir="rtl">
+
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+  <aside class="sidebar">
+
+    <!-- BRAND -->
+    <div class="brand">
+
+      <div class="brand-logo">
+        <img
+          src="/tasahel-logo.png"
+          alt="Tasahel">
+      </div>
+
+      <div class="brand-info">
+
+        <h2>Tasahel</h2>
+
+        <p>
+          Operations Center
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- MAIN WEBSITE -->
+    <a
+      routerLink="/"
+      class="website-link">
+
+      <span class="website-icon">
+
+        <lucide-icon
+          [img]="ExternalLink"
+          [size]="17"
+          [strokeWidth]="1.7">
+        </lucide-icon>
+
+      </span>
+
+      <span class="website-content">
+
+        <strong>
+          الموقع الرئيسي
+        </strong>
+
+        <small>
+          فتح واجهة العملاء
+        </small>
+
+      </span>
+
+      <span class="website-arrow">
+        ←
+      </span>
+
+    </a>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <nav class="sidebar-nav">
+
+
+      <!-- OPERATIONS -->
+      <div class="nav-group">
+
+        <p class="nav-title">
+          التشغيل
+        </p>
+
+
+        <a
+          routerLink="/admin"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="LayoutDashboard"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            لوحة المتابعة
+          </span>
+
+          <span class="active-indicator"></span>
+
+        </a>
+
+
+        <a
+          routerLink="/admin/chats"
+          routerLinkActive="active">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="MessagesSquare"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            المحادثات
+          </span>
+
+          <span class="active-indicator"></span>
+
+        </a>
+
+
+        <a
+          routerLink="/admin/requests"
+          routerLinkActive="active">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="CalendarCheck"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            طلبات الحجز
+          </span>
+
+          <span class="active-indicator"></span>
+
+        </a>
+
+
+        <!-- هنفعله مع نظام الـ Agents -->
+        <a
+          routerLink="/admin/assignments"
+          routerLinkActive="active"
+          class="future-link">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="UserRoundCheck"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            توزيع الطلبات
+          </span>
+
+          <span class="nav-badge">
+            قريباً
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- CONTENT -->
+      <div class="nav-group">
+
+        <p class="nav-title">
+          المحتوى والخدمات
+        </p>
+
+
+
+
+        <!-- Knowledge Base -->
+        <a
+          routerLink="/admin/knowledge-base"
+          routerLinkActive="active"
+          class="future-link">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="BookOpenText"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            قاعدة المعرفة
+          </span>
+
+        
+
+        </a>
+
+      </div>
+
+
+      <!-- MANAGEMENT -->
+      <div class="nav-group">
+
+        <p class="nav-title">
+          الإدارة
+        </p>
+
+
+        <a
+          routerLink="/admin/team"
+          routerLinkActive="active"
+          class="future-link">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="UsersRound"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            فريق العمل
+          </span>
+
+          <span class="nav-badge">
+            قريباً
+          </span>
+
+        </a>
+
+
+        <a
+          routerLink="/admin/reports"
+          routerLinkActive="active"
+          class="future-link">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="ChartNoAxesCombined"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            التقارير والأداء
+          </span>
+
+          <span class="nav-badge">
+            قريباً
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <!-- SYSTEM -->
+      <div class="nav-group">
+
+        <p class="nav-title">
+          النظام
+        </p>
+
+
+        <a
+          routerLink="/admin/logs"
+          routerLinkActive="active">
+
+          <span class="nav-icon">
+
+            <lucide-icon
+              [img]="ScrollText"
+              [size]="18"
+              [strokeWidth]="1.7">
+            </lucide-icon>
+
+          </span>
+
+          <span class="nav-text">
+            سجل النشاط
+          </span>
+
+          <span class="active-indicator"></span>
+
+        </a>
+
+
+      <a
+  routerLink="/admin/users"
+  routerLinkActive="active">
+
+  <span class="nav-icon">
+
+    <lucide-icon
+      [img]="Users"
+      [size]="18"
+      [strokeWidth]="1.7">
+    </lucide-icon>
+
+  </span>
+
+  <span class="nav-text">
+    إدارة المستخدمين
+  </span>
+
+</a>
+
+      </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         SIDEBAR FOOTER
+    ====================================================== -->
+
+    <div class="sidebar-footer">
+
+      <div class="system-card">
+
+        <div class="system-status-icon">
+          <span class="system-dot"></span>
+        </div>
+
+        <div class="system-info">
+
+          <strong>
+            حالة النظام
+          </strong>
+
+          <small>
+            جميع الخدمات تعمل
+          </small>
+
+        </div>
+
+        <span class="system-status-text">
+          Online
+        </span>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+
+      <div class="topbar-title">
+
+        <span class="topbar-label">
+          TASAHEL OPERATIONS
+        </span>
+
+        <h1>
+          مركز إدارة العمليات
+        </h1>
+
+        <p>
+          متابعة تجربة العملاء وطلبات الحجز والمحتوى التشغيلي
+        </p>
+
+      </div>
+
+
+      <div class="topbar-actions">
+
+        <a
+          routerLink="/"
+          class="preview-site">
+
+          <lucide-icon
+            [img]="ExternalLink"
+            [size]="15"
+            [strokeWidth]="1.8">
+          </lucide-icon>
+
+          <span>
+            عرض الموقع
+          </span>
+
+        </a>
+
+
+        <div class="admin-status">
+
+          <span class="status-dot"></span>
+
+          <div>
+
+            <strong>
+              النظام متصل
+            </strong>
+
+            <small>
+              الخدمات تعمل بصورة طبيعية
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- PAGE CONTENT -->
+    <section class="admin-content">
+
+      <router-outlet></router-outlet>
+
+    </section>
+
+  </main>
+
+</div>

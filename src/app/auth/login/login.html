@@ -1,0 +1,288 @@
+<div class="login-page" dir="rtl">
+
+  <div class="login-shell">
+
+    <!-- LEFT / BRAND SIDE -->
+    <section class="brand-panel">
+
+      <div class="brand-content">
+
+        <div class="brand-logo-wrap">
+
+          <img
+            src="/tasahel-logo.png"
+            alt="Tasahel"
+            class="brand-logo">
+
+        </div>
+
+
+        <span class="brand-kicker">
+          TASAHEL
+        </span>
+
+
+        <h1>
+          تساهيل... بنسهّل عليك
+        </h1>
+
+
+        <p>
+          مساحة واحدة لفريقنا علشان نتابع الطلبات، ننسّق الحجوزات، ونقدّم تجربة أسرع وأسهل لكل عميل.
+        </p>
+
+
+        <div class="brand-features">
+
+          <div class="feature-item">
+
+            <span class="feature-icon">
+              ✓
+            </span>
+
+            <div>
+
+              <strong>
+                كل حاجة في مكان واحد
+              </strong>
+
+              <small>
+                من أول طلب العميل لحد تأكيد الحجز والمتابعة
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature-item">
+
+            <span class="feature-icon">
+              ✓
+            </span>
+
+            <div>
+
+              <strong>
+                فريق واحد.. أدوار واضحة
+              </strong>
+
+              <small>
+                كل شخص يشوف المهام والمعلومات المناسبة لدوره
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature-item">
+
+            <span class="feature-icon">
+              ✓
+            </span>
+
+            <div>
+
+              <strong>
+                متابعة أسهل وأسرع
+              </strong>
+
+              <small>
+                الطلبات والتحديثات والمراجعات ماشية بخطوات واضحة
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="brand-footer">
+
+        <span class="system-dot"></span>
+
+        <span>
+          تساهيل معاك خطوة بخطوة
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- LOGIN SIDE -->
+    <section class="login-panel">
+
+      <div class="login-card">
+
+        <div class="login-head">
+
+          <span class="login-label">
+             فريق تساهيل
+          </span>
+
+
+         <h2>
+  كل حاجة أسهل مع تساهيل
+</h2>
+
+
+          <p>
+            سجّل دخولك وكمّل شغلك من المكان اللي وقفت عنده.
+          </p>
+
+        </div>
+
+
+        <!-- ERROR -->
+        <div
+          *ngIf="errorMessage"
+          class="login-error">
+
+          {{ errorMessage }}
+
+        </div>
+
+
+        <!-- FORM -->
+        <form
+          class="login-form"
+          (ngSubmit)="login()">
+
+
+          <div class="form-field">
+
+            <label>
+              البريد الإلكتروني
+            </label>
+
+            <div class="input-wrap">
+
+              <input
+                type="email"
+                name="email"
+                [(ngModel)]="email"
+                autocomplete="email"
+                placeholder="name@tasahel.com"
+                [disabled]="loading">
+
+            </div>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <div class="field-label-row">
+
+              <label>
+                كلمة المرور
+              </label>
+
+            </div>
+
+
+            <div class="input-wrap password-wrap">
+
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                name="password"
+                [(ngModel)]="password"
+                autocomplete="current-password"
+                placeholder="أدخلي كلمة المرور"
+                [disabled]="loading">
+
+
+              <button
+                type="button"
+                class="password-toggle"
+                [disabled]="loading"
+                (click)="togglePassword()">
+
+                {{
+                  showPassword
+                    ? 'إخفاء'
+                    : 'إظهار'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="login-button"
+            [disabled]="loading">
+
+            <span
+              *ngIf="!loading">
+
+              دخول إلى تساهيل
+
+            </span>
+
+
+            <span
+              *ngIf="loading"
+              class="loading-content">
+
+              <span class="spinner"></span>
+
+              جاري تسجيل الدخول...
+
+            </span>
+
+          </button>
+
+        </form>
+
+
+        <div class="login-security">
+
+          <div class="security-icon">
+            ✓
+          </div>
+
+          <div>
+
+            <strong>
+              حسابك محمي
+            </strong>
+
+            <span>
+              الدخول متاح فقط لأعضاء فريق تساهيل المصرّح لهم.
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="login-footer">
+
+        <span>
+          Tasahel
+        </span>
+
+        <span class="footer-divider"></span>
+
+        <span>
+          بنسهّل عليك
+        </span>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>

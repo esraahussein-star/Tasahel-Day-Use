@@ -1,0 +1,426 @@
+<div
+  class="places-page"
+  dir="rtl">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <section class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        دليل الأماكن
+      </span>
+
+      <h1>
+        الأماكن والمعرفة
+      </h1>
+
+      <p>
+        اختاري المكان وافتحي ملفه لمراجعة الباقات والسياسات ودليل الموظف.
+      </p>
+
+    </div>
+
+
+    <div class="header-count">
+
+      <span>
+        الأماكن المتاحة
+      </span>
+
+      <strong>
+        {{ filteredPlaces.length }}
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="filters-toolbar">
+
+    <!-- SEARCH -->
+
+    <div class="search-box">
+
+      <lucide-icon
+        class="search-icon"
+        [img]="Search"
+        [size]="17">
+      </lucide-icon>
+
+
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="ابحث باسم المكان، المنطقة أو الخدمة...">
+
+    </div>
+
+
+    <!-- AREA -->
+
+    <div class="filter-control">
+
+      <label>
+        المنطقة
+      </label>
+
+      <div class="select-wrap">
+
+        <lucide-icon
+          [img]="MapPin"
+          [size]="15">
+        </lucide-icon>
+
+        <select
+          [(ngModel)]="selectedArea">
+
+          <option value="all">
+            كل المناطق
+          </option>
+
+          <option
+            *ngFor="let area of areas"
+            [value]="area">
+
+            {{ area }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- CLEAR -->
+
+    <button
+      *ngIf="hasFilters"
+      type="button"
+      class="clear-filter-button"
+      (click)="clearFilters()">
+
+      <lucide-icon
+        [img]="X"
+        [size]="14">
+      </lucide-icon>
+
+      مسح
+
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    <div class="state-icon">
+
+      <lucide-icon
+        [img]="Building2"
+        [size]="22">
+      </lucide-icon>
+
+    </div>
+
+    <strong>
+      جاري تحميل الأماكن...
+    </strong>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       EMPTY
+  ====================================================== -->
+
+  <div
+    *ngIf="
+      !loading
+      &&
+      !errorMessage
+      &&
+      filteredPlaces.length === 0
+    "
+    class="page-state">
+
+    <div class="state-icon">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="22">
+      </lucide-icon>
+
+    </div>
+
+    <strong>
+      لا توجد أماكن مطابقة
+    </strong>
+
+    <span>
+      جرّبي تغيير البحث أو المنطقة.
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       PLACES GRID
+  ====================================================== -->
+
+  <section
+    *ngIf="
+      !loading
+      &&
+      !errorMessage
+      &&
+      filteredPlaces.length > 0
+    "
+    class="places-grid">
+
+    <article
+      *ngFor="
+        let place of filteredPlaces;
+        trackBy: trackByPlaceId
+      "
+      class="place-card">
+
+      <!-- =================================================
+           IMAGE
+      ================================================== -->
+
+      <div class="place-image">
+
+        <img
+          *ngIf="place.image"
+          [src]="place.image"
+          [alt]="place.name">
+
+
+        <div
+          *ngIf="!place.image"
+          class="image-placeholder">
+
+          <lucide-icon
+            [img]="Building2"
+            [size]="28">
+          </lucide-icon>
+
+        </div>
+
+
+        <span class="available-badge">
+          متاح
+        </span>
+
+      </div>
+
+
+      <!-- =================================================
+           CONTENT
+      ================================================== -->
+
+      <div class="place-content">
+
+        <!-- TOP -->
+
+        <div class="place-heading">
+
+          <div>
+
+            <span class="place-area">
+
+              <lucide-icon
+                [img]="MapPin"
+                [size]="12">
+              </lucide-icon>
+
+              {{ place.area || 'منطقة غير محددة' }}
+
+            </span>
+
+
+            <h2>
+              {{ place.name }}
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="view-place-button"
+            title="فتح ملف المكان"
+            aria-label="فتح ملف المكان"
+            (click)="openPlace(place)">
+
+            <lucide-icon
+              [img]="Eye"
+              [size]="18">
+            </lucide-icon>
+
+          </button>
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+
+        <p class="place-description">
+
+          {{
+            place.description
+            ||
+            'لا يوجد وصف متاح لهذا المكان حاليًا.'
+          }}
+
+        </p>
+
+
+        <!-- TAGS -->
+
+        <div
+          *ngIf="getTags(place).length > 0"
+          class="place-tags">
+
+          <span
+            *ngFor="let tag of getTags(place)">
+
+            {{ tag }}
+
+          </span>
+
+        </div>
+
+
+        <!-- KNOWLEDGE SUMMARY -->
+
+        <div class="place-summary">
+
+          <div>
+
+            <strong>
+              {{ getPackageCount(place) }}
+            </strong>
+
+            <span>
+              باقات
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              {{ getServiceCount(place) }}
+            </strong>
+
+            <span>
+              خدمات
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              {{ getExtraCount(place) }}
+            </strong>
+
+            <span>
+              إضافات
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <div class="place-footer">
+
+          <div class="price-block">
+
+            <span>
+              يبدأ من
+            </span>
+
+
+            <strong
+              *ngIf="getPrice(place) as price">
+
+              {{ price | number }}
+
+              <small>
+                ج.م
+              </small>
+
+            </strong>
+
+
+            <strong
+              *ngIf="!getPrice(place)"
+              class="price-unavailable">
+
+              السعر حسب الباقة
+
+            </strong>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="knowledge-button"
+            (click)="openPlace(place)">
+
+            <lucide-icon
+              [img]="BookOpen"
+              [size]="15">
+            </lucide-icon>
+
+            ملف المكان
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+</div>

@@ -1,0 +1,628 @@
+<section class="chat-container" dir="rtl">
+
+  <header class="chat-header">
+    <div class="chat-header-main">
+      <div class="assistant-avatar">
+        <img src="/tasahel-logo.png" alt="تساهيل">
+      </div>
+
+      <div class="assistant-info">
+        <h2> تساهيل</h2>
+        <p>اختيار وحجز الـ Day Use بطريقة أبسط</p>
+      </div>
+    </div>
+
+    <div class="chat-status">متاح الآن</div>
+  </header>
+
+  <!-- <div class="chat-context" *ngIf="!state.completed">
+    <strong>تساهيل ❤️</strong>
+    <span>اكتبي طلبك بطريقتك وأنا هكمل معاك خطوة بخطوة.</span>
+  </div> -->
+
+  <div class="messages-area">
+
+    <ng-container *ngFor="let message of messages">
+
+      <!-- Selected place as a real message inside the conversation -->
+      <div
+        *ngIf="message.kind === 'place' && message.place"
+        class="message-row bot place-row">
+
+        <div class="message-avatar">
+          <img src="/tasahel-logo.png" alt="تساهيل">
+        </div>
+
+        <div class="message-content place-message-content">
+          <article class="place-message-card">
+
+            <div class="place-message-image-wrap">
+              <img
+                *ngIf="message.place.image"
+                [src]="message.place.image"
+                [alt]="message.place.name"
+                class="place-message-image">
+
+              <div
+                *ngIf="!message.place.image"
+                class="place-message-placeholder">
+                تساهيل
+              </div>
+
+              <span class="place-message-price">
+                {{ formatPlacePrice(message.place.price) }}
+              </span>
+            </div>
+
+            <div class="place-message-body">
+              <div class="place-message-head">
+                <div>
+                  <span class="place-eyebrow">المكان المختار</span>
+                  <h3>{{ message.place.name }}</h3>
+                  <p class="place-area-text">
+                    {{ message.place.area || 'المنطقة غير محددة' }}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="change-place-button"
+                  [disabled]="state.completed || state.isReplying"
+                  (click)="changeSelectedPlace()">
+                  تغيير
+                </button>
+              </div>
+
+              <p
+                *ngIf="message.place.description"
+                class="place-message-description">
+                {{ message.place.description }}
+              </p>
+
+              <div
+                *ngIf="message.place.services?.length"
+                class="place-message-services">
+                <span
+                  *ngFor="let service of message.place.services | slice:0:4">
+                  {{ getServiceName(service) }}
+                </span>
+              </div>
+
+              <div class="place-message-actions">
+                <button
+                  type="button"
+                  [disabled]="!state.name || !state.phone || !state.guests || state.completed || state.isReplying"
+                  (click)="sendPlaceAction('السعر')">
+                  السعر
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="!state.name || !state.phone || !state.guests || state.completed || state.isReplying"
+                  (click)="sendPlaceAction('باكدجات')">
+                  الباكدجات
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="!state.name || !state.phone || !state.guests || state.completed || state.isReplying"
+                  (click)="sendPlaceAction('الخدمات')">
+                  الخدمات
+                </button>
+
+                <button
+                  type="button"
+                  [disabled]="!state.name || !state.phone || !state.guests || state.completed || state.isReplying"
+                  (click)="sendPlaceAction('العنوان')">
+                  العنوان
+                </button>
+              </div>
+
+              <button
+                type="button"
+                class="place-book-button"
+                [disabled]="!state.name || !state.phone || !state.guests || state.completed || state.isReplying"
+                (click)="sendPlaceAction('احجز')">
+                احجز المكان
+              </button>
+            </div>
+          </article>
+
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+      <!-- Booking summary as a clean table-like card -->
+      <div
+        *ngIf="message.kind === 'booking-summary' && message.bookingSummary"
+        class="message-row bot booking-summary-row">
+
+        <div class="message-avatar">
+          <img src="/tasahel-logo.png" alt="تساهيل">
+        </div>
+
+        <div class="message-content booking-summary-content">
+          <section class="booking-summary-card">
+            <div class="booking-summary-head">
+              <strong>بيانات الحجز ❤️</strong>
+              <span>راجعي البيانات قبل التأكيد</span>
+            </div>
+
+            <div class="booking-summary-table">
+              <div class="booking-summary-line">
+                <span>المكان</span>
+                <strong>{{ message.bookingSummary.placeName }}</strong>
+              </div>
+
+              <div class="booking-summary-line">
+                <span>التاريخ</span>
+                <strong>{{ message.bookingSummary.date }}</strong>
+              </div>
+
+              <div class="booking-summary-line">
+                <span>الوقت</span>
+                <strong>{{ message.bookingSummary.time }}</strong>
+              </div>
+
+              <div class="booking-summary-line">
+                <span>عدد الأشخاص</span>
+                <strong>{{ message.bookingSummary.guests }}</strong>
+              </div>
+
+              <div class="booking-summary-line">
+                <span>سعر الفرد التقريبي</span>
+                <strong>{{ formatPlacePrice(message.bookingSummary.unitPrice) }}</strong>
+              </div>
+
+              <div class="booking-summary-line total-line">
+                <span>الإجمالي التقريبي</span>
+                <strong>{{ formatPlacePrice(message.bookingSummary.totalPrice) }}</strong>
+              </div>
+            </div>
+
+            <p class="booking-summary-note">
+              السعر المعروض تقريبي وقد يتغير حسب التوافر وتفاصيل الحجز.
+              فريق تساهيل هيتواصل معاك لتأكيد البيانات والسعر النهائي ❤️
+            </p>
+          </section>
+
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+      <!-- Payment receipt inside the same conversation -->
+      <div
+        *ngIf="message.kind === 'payment-receipt' && message.receipt"
+        class="message-row user payment-receipt-message-row">
+
+        <div class="message-content payment-receipt-message-content">
+          <article class="payment-receipt-message-card">
+
+            <div class="payment-receipt-message-preview">
+              <img
+                *ngIf="message.receipt.mimeType.startsWith('image/')"
+                [src]="message.receipt.url"
+                [alt]="message.receipt.fileName">
+
+              <a
+                *ngIf="message.receipt.mimeType === 'application/pdf'"
+                [href]="message.receipt.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="payment-receipt-pdf">
+                <strong>PDF</strong>
+                <span>فتح إيصال الدفع</span>
+              </a>
+            </div>
+
+            <div class="payment-receipt-message-info">
+              <div>
+                <strong>إيصال الدفع</strong>
+                <span>{{ message.receipt.fileName }}</span>
+              </div>
+
+              <span class="payment-receipt-status">
+                {{ message.receipt.status === 'approved' ? 'تمت المراجعة' : 'قيد المراجعة' }}
+              </span>
+            </div>
+
+          </article>
+
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+      <!-- Customer / agent image inside chat -->
+      <div
+        *ngIf="message.kind === 'image' && message.media"
+        class="message-row media-message-row"
+        [class.user]="message.sender === 'user'"
+        [class.bot]="message.sender !== 'user'">
+
+        <div *ngIf="message.sender !== 'user'" class="message-avatar">
+          <img src="/tasahel-logo.png" alt="تساهيل">
+        </div>
+
+        <div class="message-content media-message-content">
+          <a
+            class="chat-image-card"
+            [href]="message.media.url"
+            target="_blank"
+            rel="noopener noreferrer">
+            <img
+              [src]="message.media.url"
+              [alt]="message.media.fileName || 'صورة من المحادثة'">
+          </a>
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+      <!-- Voice note inside chat -->
+      <div
+        *ngIf="message.kind === 'voice' && message.media"
+        class="message-row media-message-row"
+        [class.user]="message.sender === 'user'"
+        [class.bot]="message.sender !== 'user'">
+
+        <div *ngIf="message.sender !== 'user'" class="message-avatar">
+          <img src="/tasahel-logo.png" alt="تساهيل">
+        </div>
+
+        <div class="message-content media-message-content">
+          <div class="chat-voice-card">
+            <span class="voice-icon">🎤</span>
+            <audio controls preload="metadata" [src]="message.media.url"></audio>
+          </div>
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+      <!-- Normal chat message -->
+      <div
+        *ngIf="message.kind !== 'place' && message.kind !== 'booking-summary' && message.kind !== 'payment-receipt' && message.kind !== 'image' && message.kind !== 'voice'"
+        class="message-row"
+        [class.bot]="message.sender === 'bot'"
+        [class.user]="message.sender === 'user'">
+
+        <div *ngIf="message.sender === 'bot'" class="message-avatar">
+          <img src="/tasahel-logo.png" alt="تساهيل">
+        </div>
+
+        <div class="message-content">
+          <div class="message-bubble">{{ message.text }}</div>
+          <span class="message-time">{{ message.time }}</span>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <div *ngIf="isTyping && !state.completed" class="typing-row">
+      <div class="message-avatar">
+        <img src="/tasahel-logo.png" alt="تساهيل">
+      </div>
+
+      <div class="typing-bubble">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div
+      *ngIf="placesLoading && !filteredPlaces.length && !state.completed"
+      class="places-loading">
+      <div class="loading-spinner"></div>
+      <div>
+        <strong>لحظة واحدة ❤️</strong>
+        <span>بجهز الأماكن المناسبة.</span>
+      </div>
+    </div>
+
+    <div
+      *ngIf="filteredPlaces.length && !state.selectedPlace && !state.completed && (state.awaiting === 'recommended' || state.currentStep === 'recommendations')"
+      class="places-section">
+
+      <div class="places-section-header">
+        <div>
+          <h3>الأماكن المتاحة</h3>
+          <p>اختاري المكان المناسب، وهكمل معاك عليه مباشرة.</p>
+        </div>
+        <span class="places-count">{{ filteredPlaces.length }}</span>
+      </div>
+
+      <div class="places-grid">
+        <article
+          *ngFor="let place of filteredPlaces; trackBy: trackByPlace"
+          class="place-card"
+          (click)="selectPlace(place)">
+
+          <div class="place-image-wrapper">
+            <img
+              *ngIf="place.image"
+              [src]="place.image"
+              [alt]="place.name"
+              class="place-image">
+
+            <div *ngIf="!place.image" class="place-image-placeholder">تساهيل</div>
+
+            <div class="place-price">{{ formatPlacePrice(place.price) }}</div>
+          </div>
+
+          <div class="place-card-content">
+            <h4>{{ place.name }}</h4>
+            <div class="place-area">{{ place.area || 'المنطقة غير محددة' }}</div>
+
+            <p *ngIf="place.description" class="place-description">
+              {{ place.description }}
+            </p>
+
+            <div *ngIf="place.tags?.length" class="place-tags">
+              <span *ngFor="let tag of place.tags | slice:0:3" class="place-tag">
+                {{ tag }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="place-select-button"
+              (click)="selectPlace(place); $event.stopPropagation()">
+              اختيار المكان
+            </button>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Payment method select -->
+    <section
+      *ngIf="shouldShowPaymentMethodSelect"
+      class="payment-method-card">
+
+      <div class="payment-method-head">
+        <div>
+          <strong>اختاري طريقة الدفع</strong>
+          <span>اختاري الطريقة المناسبة ثم اضغطي تأكيد.</span>
+        </div>
+        <span class="payment-method-badge">الدفع</span>
+      </div>
+
+      <div class="payment-transfer-note">
+        <strong>تفاصيل الدفعة المطلوبة</strong>
+        <span *ngIf="state.paymentAmountDue">المبلغ: {{ state.paymentAmountDue | number:'1.0-2' }} جنيه</span>
+        <span *ngIf="state.paymentRequestReason">السبب: {{ state.paymentRequestReason }}</span>
+        <small>اختاري طريقة الدفع أولًا، وبعدها هيظهر رفع الإيصال.</small>
+      </div>
+
+      <select
+        class="payment-method-select"
+        [(ngModel)]="selectedPaymentMethodCode"
+        [disabled]="paymentMethodsLoading || selectingPaymentMethod">
+
+        <option value="" disabled>
+          {{ paymentMethodsLoading ? 'جاري تحميل طرق الدفع...' : 'اختاري طريقة الدفع' }}
+        </option>
+
+        <option
+          *ngFor="let method of paymentMethods"
+          [value]="method.code">
+          {{ method.name }}
+          {{ method.fee_percent > 0 ? ' - رسوم ' + method.fee_percent + '%' : ' - بدون رسوم إضافية' }}
+        </option>
+
+      </select>
+
+      <button
+        type="button"
+        class="payment-method-confirm-button"
+        [disabled]="!selectedPaymentMethodCode || paymentMethodsLoading || selectingPaymentMethod"
+        (click)="confirmPaymentMethodSelection()">
+        {{ selectingPaymentMethod ? 'جاري تأكيد الطريقة...' : 'تأكيد طريقة الدفع' }}
+      </button>
+
+    </section>
+
+    <!-- Customer payment receipt upload -->
+    <section
+      *ngIf="shouldShowPaymentReceiptUpload"
+      class="payment-receipt-card">
+
+      <div class="payment-receipt-head">
+        <div>
+          <strong>إرسال إيصال الدفع</strong>
+          <span>بعد التحويل، ارفعي صورة الإيصال أو ملف PDF هنا.</span>
+        </div>
+        <span class="payment-receipt-badge">الدفع</span>
+      </div>
+
+      <div class="payment-transfer-note">
+        <strong>بيانات الدفعة المطلوبة</strong>
+        <span *ngIf="state.paymentAmountDue">المبلغ المطلوب: {{ state.paymentAmountDue | number:'1.0-2' }} جنيه</span>
+        <span *ngIf="state.paymentRequestReason">سبب الدفع: {{ state.paymentRequestReason }}</span>
+        <span>استخدمي طريقة الدفع اللي اخترتيها، وبعد التحويل ارفعي الإيصال.</span>
+        <small>الدفع لا يعني تأكيد الحجز إلا بعد تأكيد المكان من فريق تساهيل.</small>
+      </div>
+
+      <label class="payment-file-picker">
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          [disabled]="paymentReceipt.uploading"
+          (change)="onPaymentReceiptSelected($event)">
+
+        <span *ngIf="!paymentReceipt.file">اختيار صورة أو PDF</span>
+        <span *ngIf="paymentReceipt.file" class="payment-file-name">
+          {{ paymentReceipt.file.name }}
+        </span>
+      </label>
+
+      <div *ngIf="paymentReceipt.error" class="payment-receipt-error">
+        {{ paymentReceipt.error }}
+      </div>
+
+      <div *ngIf="paymentReceipt.success" class="payment-receipt-success">
+        تم رفع الإيصال بنجاح ✅ وجاري مراجعته من قسم الحسابات.
+      </div>
+
+      <button
+        type="button"
+        class="payment-upload-button"
+        [disabled]="!paymentReceipt.file || paymentReceipt.uploading"
+        (click)="uploadPaymentReceipt()">
+        {{ paymentReceipt.uploading ? 'جاري رفع الإيصال...' : 'رفع الإيصال' }}
+      </button>
+
+    </section>
+
+    <div *ngIf="state.completed" class="booking-completed">
+      <strong>تم الحجز ❤️</strong>
+      <span>طلبك اتسجل بنجاح، وفريق تساهيل هيتواصل معاك للتأكيد.</span>
+    </div>
+
+  </div>
+
+  <div *ngIf="!state.completed" class="quick-actions">
+    <button
+      *ngFor="let action of quickActions"
+      type="button"
+      class="quick-action"
+      [disabled]="state.isReplying"
+      (click)="useQuickAction(action.message)">
+      {{ action.label }}
+    </button>
+  </div>
+
+  <div *ngIf="!state.completed" class="chat-input-area">
+
+    <div *ngIf="chatMediaError" class="chat-media-error">
+      {{ chatMediaError }}
+    </div>
+
+    <div *ngIf="voiceRecording" class="voice-recording-bar">
+      <span class="recording-dot"></span>
+      <strong>جاري التسجيل {{ voiceDurationSeconds }} ث</strong>
+      <button type="button" (click)="cancelVoiceRecording()">إلغاء</button>
+    </div>
+
+    <div class="chat-input-wrapper agent-media-composer">
+
+      <input
+        #chatImageInput
+        type="file"
+        accept="image/*"
+        hidden
+        [disabled]="!canUseChatMedia || chatMediaUploading"
+        (change)="onChatImageSelected($event)">
+
+     <button
+  type="button"
+  class="composer-icon-button"
+  title="إرسال صورة"
+  aria-label="إرسال صورة"
+  [disabled]="!canUseChatMedia || chatMediaUploading || voiceRecording"
+  (click)="chatImageInput.click()">
+
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true">
+    <rect
+      x="3"
+      y="5"
+      width="18"
+      height="14"
+      rx="3">
+    </rect>
+
+    <circle
+      cx="9"
+      cy="10"
+      r="2">
+    </circle>
+
+    <path
+      d="M21 15l-4.5-4.5L8 19">
+    </path>
+  </svg>
+
+</button>
+
+
+<button
+  type="button"
+  class="composer-icon-button voice-button"
+  [class.recording]="voiceRecording"
+  [title]="voiceRecording ? 'إرسال التسجيل' : 'تسجيل رسالة صوتية'"
+  [attr.aria-label]="voiceRecording ? 'إرسال التسجيل' : 'تسجيل رسالة صوتية'"
+  [disabled]="!canUseChatMedia || chatMediaUploading"
+  (click)="toggleVoiceRecording()">
+
+  <!-- Microphone -->
+  <svg
+    *ngIf="!voiceRecording"
+    viewBox="0 0 24 24"
+    aria-hidden="true">
+
+    <rect
+      x="9"
+      y="3"
+      width="6"
+      height="11"
+      rx="3">
+    </rect>
+
+    <path
+      d="M5.5 11a6.5 6.5 0 0 0 13 0">
+    </path>
+
+    <path
+      d="M12 17.5V21">
+    </path>
+
+    <path
+      d="M9 21h6">
+    </path>
+
+  </svg>
+
+
+  <!-- Stop recording -->
+  <svg
+    *ngIf="voiceRecording"
+    viewBox="0 0 24 24"
+    aria-hidden="true">
+
+    <rect
+      class="stop-shape"
+      x="7"
+      y="7"
+      width="10"
+      height="10"
+      rx="2">
+    </rect>
+
+  </svg>
+
+</button>
+      <input
+        type="text"
+        [(ngModel)]="messageText"
+        (keydown)="onInputKeydown($event)"
+        placeholder="اكتبي رسالتك هنا..."
+        autocomplete="off"
+        [disabled]="state.isReplying || voiceRecording || shouldShowPaymentMethodSelect">
+
+      <button
+        type="button"
+        class="send-button"
+        aria-label="إرسال"
+        [disabled]="state.isReplying || voiceRecording || shouldShowPaymentMethodSelect || !messageText.trim()"
+        (click)="sendMessage()">
+        إرسال
+      </button>
+    </div>
+
+    <small class="media-mode-note" [class.enabled]="canUseChatMedia">
+      {{ canUseChatMedia
+        ? 'الصورة والرسالة الصوتية متاحة لأن أحد أعضاء فريق تساهيل يتابع المحادثة.'
+        : 'الصورة والرسالة الصوتية تتفعّل عند استلام أحد أعضاء فريق تساهيل للمحادثة.' }}
+    </small>
+  </div>
+
+</section>

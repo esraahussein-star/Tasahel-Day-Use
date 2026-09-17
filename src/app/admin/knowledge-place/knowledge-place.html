@@ -1,0 +1,1798 @@
+<div
+  class="knowledge-place-page"
+  dir="rtl">
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    <lucide-icon
+      [img]="Building2"
+      [size]="22">
+    </lucide-icon>
+
+    <strong>
+      جاري تحميل بيانات المكان...
+    </strong>
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="
+      !loading
+      &&
+      errorMessage
+      &&
+      !place
+    "
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENT
+  ====================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading
+      &&
+      place
+    ">
+
+    <!-- ===================================================
+         HERO
+    ==================================================== -->
+
+    <section class="place-hero">
+
+      <div class="hero-image">
+
+        <img
+          *ngIf="place.image"
+          [src]="place.image"
+          [alt]="place.name">
+
+
+        <div
+          *ngIf="!place.image"
+          class="hero-placeholder">
+
+          <lucide-icon
+            [img]="Building2"
+            [size]="34">
+          </lucide-icon>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="back-button"
+          (click)="goBack()">
+
+          <lucide-icon
+            [img]="ArrowRight"
+            [size]="16">
+          </lucide-icon>
+
+          رجوع
+
+        </button>
+
+
+        <span
+          class="place-status"
+          [class.inactive]="!place.active">
+
+          {{
+            place.active
+              ? 'متاح'
+              : 'غير متاح'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <div class="hero-content">
+
+        <div class="hero-main">
+
+          <span class="place-area">
+
+            <lucide-icon
+              [img]="MapPin"
+              [size]="13">
+            </lucide-icon>
+
+            {{ place.area || 'منطقة غير محددة' }}
+
+          </span>
+
+
+          <h1>
+            {{ place.name }}
+          </h1>
+
+
+          <p>
+            {{
+              place.description
+              ||
+              'لا يوجد وصف متاح لهذا المكان حاليًا.'
+            }}
+          </p>
+
+
+          <div
+            *ngIf="getPlaceTags().length > 0"
+            class="hero-tags">
+
+            <span
+              *ngFor="
+                let tag of getPlaceTags()
+              ">
+
+              {{ tag }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="hero-side">
+
+          <div class="hero-price">
+
+            <span>
+              سعر البيع
+            </span>
+
+            <strong>
+              {{ place.price | number }}
+
+              <small>
+                ج.م
+              </small>
+            </strong>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="edit-place-button"
+            (click)="openPlaceEdit()">
+
+            <lucide-icon
+              [img]="Pencil"
+              [size]="15">
+            </lucide-icon>
+
+            تعديل بيانات المكان
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         MESSAGES
+    ==================================================== -->
+
+    <div
+      *ngIf="successMessage"
+      class="message success">
+
+      {{ successMessage }}
+
+    </div>
+
+
+    <div
+      *ngIf="errorMessage"
+      class="message error">
+
+      {{ errorMessage }}
+
+    </div>
+
+
+    <!-- ===================================================
+         TABS
+    ==================================================== -->
+
+    <section class="place-tabs">
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'overview'"
+        (click)="setTab('overview')">
+
+        Overview
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'packages'"
+        (click)="setTab('packages')">
+
+        Packages
+
+        <span>
+          {{ packages.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'services'"
+        (click)="setTab('services')">
+
+        Services
+
+        <span>
+          {{ services.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'extras'"
+        (click)="setTab('extras')">
+
+        Extras
+
+        <span>
+          {{ extras.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'knowledge'"
+        (click)="setTab('knowledge')">
+
+        Knowledge Base
+
+        <span>
+          {{ knowledgeItems.length }}
+        </span>
+
+      </button>
+
+    </section>
+
+
+    <!-- ===================================================
+         OVERVIEW
+    ==================================================== -->
+
+    <section
+      *ngIf="activeTab === 'overview'"
+      class="tab-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="section-label">
+            Overview
+          </span>
+
+          <h2>
+            معلومات المكان
+          </h2>
+
+          <p>
+            ملخص البيانات الأساسية المسجلة للمكان.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="overview-grid">
+
+        <div class="overview-item">
+
+          <span>
+            اسم المكان
+          </span>
+
+          <strong>
+            {{ place.name }}
+          </strong>
+
+        </div>
+
+
+        <div class="overview-item">
+
+          <span>
+            المنطقة
+          </span>
+
+          <strong>
+            {{ place.area || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="overview-item">
+
+          <span>
+            سعر البيع
+          </span>
+
+          <strong>
+            {{ place.price | number }} ج.م
+          </strong>
+
+        </div>
+
+
+        <div class="overview-item">
+
+          <span>
+            سعر التكلفة
+          </span>
+
+          <strong>
+            {{ place.cost_price | number }} ج.م
+          </strong>
+
+        </div>
+
+
+        <div class="overview-item full">
+
+          <span>
+            الوصف
+          </span>
+
+          <p>
+            {{
+              place.description
+              ||
+              'لا يوجد وصف متاح.'
+            }}
+          </p>
+
+        </div>
+
+
+        <div class="overview-item full">
+
+          <span>
+            Tags
+          </span>
+
+          <div
+            *ngIf="getPlaceTags().length > 0"
+            class="overview-tags">
+
+            <span
+              *ngFor="
+                let tag of getPlaceTags()
+              ">
+
+              {{ tag }}
+
+            </span>
+
+          </div>
+
+
+          <p
+            *ngIf="getPlaceTags().length === 0"
+            class="empty-inline">
+
+            لا توجد Tags مضافة.
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PACKAGES
+    ==================================================== -->
+
+    <section
+      *ngIf="activeTab === 'packages'"
+      class="tab-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="section-label">
+            Packages
+          </span>
+
+          <h2>
+            الباقات
+          </h2>
+
+          <p>
+            الباقات المتاحة للعميل داخل هذا المكان.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="add-button"
+          (click)="openItemCreate('package')">
+
+          <lucide-icon
+            [img]="Plus"
+            [size]="15">
+          </lucide-icon>
+
+          Add Package
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="packages.length === 0"
+        class="empty-content">
+
+        لا توجد باقات مضافة حتى الآن.
+
+      </div>
+
+
+      <div
+        *ngIf="packages.length > 0"
+        class="content-cards">
+
+        <article
+          *ngFor="
+            let item of packages;
+            let i = index
+          "
+          class="content-card">
+
+          <div class="content-card-main">
+
+            <h3>
+              {{ item.name }}
+            </h3>
+
+            <p>
+              {{
+                item.description
+                ||
+                'لا يوجد وصف لهذه الباقة.'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="content-card-footer">
+
+            <strong>
+              {{ item.price | number }} ج.م
+            </strong>
+
+
+            <div class="card-actions">
+
+              <button
+                type="button"
+                title="Edit"
+                (click)="
+                  openItemEdit(
+                    'package',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Pencil"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+
+              <button
+                type="button"
+                class="danger"
+                title="Delete"
+                [disabled]="deleting"
+                (click)="
+                  deleteItem(
+                    'package',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Trash2"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         SERVICES
+    ==================================================== -->
+
+    <section
+      *ngIf="activeTab === 'services'"
+      class="tab-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="section-label">
+            Services
+          </span>
+
+          <h2>
+            الخدمات
+          </h2>
+
+          <p>
+            الخدمات المتوفرة داخل المكان.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="add-button"
+          (click)="openItemCreate('service')">
+
+          <lucide-icon
+            [img]="Plus"
+            [size]="15">
+          </lucide-icon>
+
+          Add Service
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="services.length === 0"
+        class="empty-content">
+
+        لا توجد خدمات مضافة حتى الآن.
+
+      </div>
+
+
+      <div
+        *ngIf="services.length > 0"
+        class="content-cards">
+
+        <article
+          *ngFor="
+            let item of services;
+            let i = index
+          "
+          class="content-card">
+
+          <div class="content-card-main">
+
+            <h3>
+              {{ item.name }}
+            </h3>
+
+            <p>
+              {{
+                item.description
+                ||
+                'لا يوجد وصف لهذه الخدمة.'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="content-card-footer">
+
+            <strong>
+              {{ item.price | number }} ج.م
+            </strong>
+
+
+            <div class="card-actions">
+
+              <button
+                type="button"
+                title="Edit"
+                (click)="
+                  openItemEdit(
+                    'service',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Pencil"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+
+              <button
+                type="button"
+                class="danger"
+                title="Delete"
+                [disabled]="deleting"
+                (click)="
+                  deleteItem(
+                    'service',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Trash2"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         EXTRAS
+    ==================================================== -->
+
+    <section
+      *ngIf="activeTab === 'extras'"
+      class="tab-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="section-label">
+            Extras
+          </span>
+
+          <h2>
+            الإضافات
+          </h2>
+
+          <p>
+            الإضافات الاختيارية المتاحة للعميل.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="add-button"
+          (click)="openItemCreate('extra')">
+
+          <lucide-icon
+            [img]="Plus"
+            [size]="15">
+          </lucide-icon>
+
+          Add Extra
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="extras.length === 0"
+        class="empty-content">
+
+        لا توجد إضافات مضافة حتى الآن.
+
+      </div>
+
+
+      <div
+        *ngIf="extras.length > 0"
+        class="content-cards">
+
+        <article
+          *ngFor="
+            let item of extras;
+            let i = index
+          "
+          class="content-card">
+
+          <div class="content-card-main">
+
+            <h3>
+              {{ item.name }}
+            </h3>
+
+            <p>
+              {{
+                item.description
+                ||
+                'لا يوجد وصف لهذه الإضافة.'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="content-card-footer">
+
+            <strong>
+              {{ item.price | number }} ج.م
+            </strong>
+
+
+            <div class="card-actions">
+
+              <button
+                type="button"
+                title="Edit"
+                (click)="
+                  openItemEdit(
+                    'extra',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Pencil"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+
+              <button
+                type="button"
+                class="danger"
+                title="Delete"
+                [disabled]="deleting"
+                (click)="
+                  deleteItem(
+                    'extra',
+                    i,
+                    item
+                  )
+                ">
+
+                <lucide-icon
+                  [img]="Trash2"
+                  [size]="14">
+                </lucide-icon>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         KNOWLEDGE BASE
+    ==================================================== -->
+
+    <section
+      *ngIf="activeTab === 'knowledge'"
+      class="tab-panel knowledge-panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="section-label">
+            Knowledge Base
+          </span>
+
+          <h2>
+            الأسئلة والإجابات
+          </h2>
+
+          <p>
+            معلومات مرجعية مرتبطة بالـTags ويستخدمها فريق العمل والشات.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="add-button"
+          (click)="openKnowledgeCreate()">
+
+          <lucide-icon
+            [img]="Plus"
+            [size]="15">
+          </lucide-icon>
+
+          Add Q&A
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="knowledgeItems.length === 0"
+        class="empty-content">
+
+        لا توجد أسئلة وإجابات مضافة حتى الآن.
+
+      </div>
+
+
+      <div
+        *ngIf="knowledgeItems.length > 0"
+        class="knowledge-grid">
+
+        <article
+          *ngFor="
+            let item of knowledgeItems
+          "
+          class="knowledge-card"
+          [class.inactive]="!item.active">
+
+          <div class="knowledge-card-top">
+
+            <div class="knowledge-status">
+
+              <i
+                [class.inactive]="!item.active">
+              </i>
+
+              {{
+                item.active
+                  ? 'Active'
+                  : 'Inactive'
+              }}
+
+            </div>
+
+
+            <span class="priority-badge">
+              Priority {{ item.priority || 0 }}
+            </span>
+
+          </div>
+
+
+          <div class="knowledge-question">
+
+            <span>
+              Question
+            </span>
+
+            <h3>
+              {{ item.title }}
+            </h3>
+
+          </div>
+
+
+          <div class="knowledge-answer">
+
+            <span>
+              Answer
+            </span>
+
+            <p>
+              {{ item.content }}
+            </p>
+
+          </div>
+
+
+          <div
+            *ngIf="item.keywords?.length"
+            class="knowledge-tags">
+
+            <span
+              *ngFor="
+                let tag of item.keywords
+              ">
+
+              {{ tag }}
+
+            </span>
+
+          </div>
+
+
+          <div class="knowledge-card-actions">
+
+            <button
+              type="button"
+              title="Edit"
+              (click)="openKnowledgeEdit(item)">
+
+              <lucide-icon
+                [img]="Pencil"
+                [size]="14">
+              </lucide-icon>
+
+              Edit
+
+            </button>
+
+
+            <button
+              type="button"
+              [class.off]="!item.active"
+              (click)="toggleKnowledge(item)">
+
+              <lucide-icon
+                [img]="Power"
+                [size]="14">
+              </lucide-icon>
+
+              {{
+                item.active
+                  ? 'Deactivate'
+                  : 'Activate'
+              }}
+
+            </button>
+
+
+            <button
+              type="button"
+              class="danger"
+              [disabled]="deleting"
+              (click)="deleteKnowledge(item)">
+
+              <lucide-icon
+                [img]="Trash2"
+                [size]="14">
+              </lucide-icon>
+
+              Delete
+
+            </button>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+
+  <!-- =====================================================
+       EDIT PLACE MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="placeEditOpen"
+    class="modal-backdrop"
+    (click)="closePlaceEdit()">
+
+    <div
+      class="form-modal wide-modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal-head">
+
+        <div>
+
+          <span>
+            Edit Place
+          </span>
+
+          <strong>
+            تعديل بيانات المكان
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closePlaceEdit()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="18">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <div class="form-grid">
+
+          <label class="form-field">
+
+            <span>
+              Place Name
+            </span>
+
+            <small>
+              اسم المكان
+            </small>
+
+            <input
+              type="text"
+              [(ngModel)]="placeForm.name">
+
+          </label>
+
+
+          <label class="form-field">
+
+            <span>
+              Area
+            </span>
+
+            <small>
+              المنطقة
+            </small>
+
+            <input
+              type="text"
+              [(ngModel)]="placeForm.area">
+
+          </label>
+
+
+          <label class="form-field">
+
+            <span>
+              Selling Price
+            </span>
+
+            <small>
+              سعر البيع
+            </small>
+
+            <div class="money-input">
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="placeForm.price">
+
+              <strong>
+                EGP
+              </strong>
+
+            </div>
+
+          </label>
+
+
+          <label class="form-field">
+
+            <span>
+              Cost Price
+            </span>
+
+            <small>
+              سعر التكلفة
+            </small>
+
+            <div class="money-input">
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="placeForm.cost_price">
+
+              <strong>
+                EGP
+              </strong>
+
+            </div>
+
+          </label>
+
+
+          <label class="form-field full">
+
+            <span>
+              Image URL
+            </span>
+
+            <small>
+              رابط الصورة
+            </small>
+
+            <input
+              type="text"
+              [(ngModel)]="placeForm.image">
+
+          </label>
+
+
+          <label class="form-field full">
+
+            <span>
+              Description
+            </span>
+
+            <small>
+              وصف المكان
+            </small>
+
+            <textarea
+              rows="4"
+              [(ngModel)]="placeForm.description">
+            </textarea>
+
+          </label>
+
+        </div>
+
+
+        <!-- TAG SELECTOR -->
+
+        <div class="tag-field">
+
+          <div class="field-label">
+
+            <span>
+              Tags
+            </span>
+
+            <small>
+              اختاري Tag موجودة أو أضيفي Tag جديدة
+            </small>
+
+          </div>
+
+
+          <div
+            *ngIf="selectedTags.length > 0"
+            class="selected-tags">
+
+            <button
+              *ngFor="
+                let tag of selectedTags
+              "
+              type="button"
+              class="selected-tag"
+              (click)="removeSelectedTag(tag)">
+
+              {{ tag }}
+
+              <span>
+                ×
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <div class="tag-selector">
+
+            <div class="tag-search">
+
+              <lucide-icon
+                [img]="Search"
+                [size]="14">
+              </lucide-icon>
+
+              <input
+                type="text"
+                [(ngModel)]="tagSearch"
+                (focus)="tagDropdownOpen = true"
+                (input)="tagDropdownOpen = true"
+                placeholder="Search or add a tag...">
+
+            </div>
+
+
+            <div
+              *ngIf="tagDropdownOpen"
+              class="tag-dropdown">
+
+              <button
+                *ngFor="
+                  let tag of filteredAvailableTags
+                "
+                type="button"
+                (click)="selectTag(tag)">
+
+                <span>
+                  {{ tag }}
+                </span>
+
+                <small>
+                  Select
+                </small>
+
+              </button>
+
+
+              <button
+                *ngIf="canAddNewTag"
+                type="button"
+                class="add-new-tag"
+                (click)="addNewTag()">
+
+                <lucide-icon
+                  [img]="Plus"
+                  [size]="14">
+                </lucide-icon>
+
+                Add new tag
+
+                <strong>
+                  "{{ tagSearch.trim() }}"
+                </strong>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <label class="active-control">
+
+          <div>
+
+            <strong>
+              Active Place
+            </strong>
+
+            <span>
+              المكان متاح ويظهر لفريق العمل
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            [(ngModel)]="placeForm.active">
+
+        </label>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closePlaceEdit()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="savePlaceOverview()">
+
+          <lucide-icon
+            [img]="Save"
+            [size]="14">
+          </lucide-icon>
+
+          Save Changes
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       ITEM MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="itemModalOpen"
+    class="modal-backdrop"
+    (click)="closeItemModal()">
+
+    <div
+      class="form-modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal-head">
+
+        <div>
+
+          <span>
+            {{
+              editingItemIndex === null
+                ? 'New Item'
+                : 'Edit Item'
+            }}
+          </span>
+
+          <strong>
+            {{
+              itemType === 'package'
+                ? 'Package'
+                : itemType === 'service'
+                  ? 'Service'
+                  : 'Extra'
+            }}
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeItemModal()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="18">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <label class="form-field">
+
+          <span>
+            Name
+          </span>
+
+          <small>
+            الاسم
+          </small>
+
+          <input
+            type="text"
+            [(ngModel)]="itemForm.name">
+
+        </label>
+
+
+        <label class="form-field">
+
+          <span>
+            Price
+          </span>
+
+          <small>
+            السعر
+          </small>
+
+          <div class="money-input">
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="itemForm.price">
+
+            <strong>
+              EGP
+            </strong>
+
+          </div>
+
+        </label>
+
+
+        <label class="form-field full">
+
+          <span>
+            Description
+          </span>
+
+          <small>
+            الوصف
+          </small>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="itemForm.description">
+          </textarea>
+
+        </label>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeItemModal()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="saveItem()">
+
+          <lucide-icon
+            [img]="Save"
+            [size]="14">
+          </lucide-icon>
+
+          Save Changes
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       KNOWLEDGE MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="knowledgeModalOpen"
+    class="modal-backdrop"
+    (click)="closeKnowledgeModal()">
+
+    <div
+      class="form-modal wide-modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal-head">
+
+        <div>
+
+          <span>
+            {{
+              editingKnowledge
+                ? 'Edit Q&A'
+                : 'New Q&A'
+            }}
+          </span>
+
+          <strong>
+            Knowledge Base
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeKnowledgeModal()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="18">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <div class="modal-body">
+
+        <label class="form-field full">
+
+          <span>
+            Question
+          </span>
+
+          <small>
+            السؤال
+          </small>
+
+          <textarea
+            rows="3"
+            [(ngModel)]="knowledgeForm.title"
+            placeholder="مثال: هل يوجد حد أدنى للعمر؟">
+          </textarea>
+
+        </label>
+
+
+        <label class="form-field full">
+
+          <span>
+            Answer
+          </span>
+
+          <small>
+            الإجابة
+          </small>
+
+          <textarea
+            rows="6"
+            [(ngModel)]="knowledgeForm.content"
+            placeholder="اكتبي الإجابة التي يجب أن تظهر للموظف أو الشات...">
+          </textarea>
+
+        </label>
+
+
+        <label class="form-field priority-field">
+
+          <span>
+            Priority
+          </span>
+
+          <small>
+            الأولوية
+          </small>
+
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="knowledgeForm.priority">
+
+        </label>
+
+
+        <!-- KNOWLEDGE TAGS -->
+
+        <div class="tag-field">
+
+          <div class="field-label">
+
+            <span>
+              Tags
+            </span>
+
+            <small>
+              اربطي السؤال بالتصنيفات المناسبة
+            </small>
+
+          </div>
+
+
+          <div
+            *ngIf="knowledgeSelectedTags.length > 0"
+            class="selected-tags">
+
+            <button
+              *ngFor="
+                let tag of knowledgeSelectedTags
+              "
+              type="button"
+              class="selected-tag"
+              (click)="removeKnowledgeTag(tag)">
+
+              {{ tag }}
+
+              <span>
+                ×
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <div class="tag-selector">
+
+            <div class="tag-search">
+
+              <lucide-icon
+                [img]="Search"
+                [size]="14">
+              </lucide-icon>
+
+              <input
+                type="text"
+                [(ngModel)]="knowledgeTagSearch"
+                (focus)="knowledgeTagDropdownOpen = true"
+                (input)="knowledgeTagDropdownOpen = true"
+                placeholder="Search or add a tag...">
+
+            </div>
+
+
+            <div
+              *ngIf="knowledgeTagDropdownOpen"
+              class="tag-dropdown">
+
+              <button
+                *ngFor="
+                  let tag of filteredKnowledgeTags
+                "
+                type="button"
+                (click)="selectKnowledgeTag(tag)">
+
+                <span>
+                  {{ tag }}
+                </span>
+
+                <small>
+                  Select
+                </small>
+
+              </button>
+
+
+              <button
+                *ngIf="canAddNewKnowledgeTag"
+                type="button"
+                class="add-new-tag"
+                (click)="addNewKnowledgeTag()">
+
+                <lucide-icon
+                  [img]="Plus"
+                  [size]="14">
+                </lucide-icon>
+
+                Add new tag
+
+                <strong>
+                  "{{ knowledgeTagSearch.trim() }}"
+                </strong>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <label class="active-control">
+
+          <div>
+
+            <strong>
+              Active Q&A
+            </strong>
+
+            <span>
+              المعلومة متاحة لفريق العمل والشات
+            </span>
+
+          </div>
+
+          <input
+            type="checkbox"
+            [(ngModel)]="knowledgeForm.active">
+
+        </label>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeKnowledgeModal()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="saveKnowledge()">
+
+          <lucide-icon
+            [img]="Save"
+            [size]="14">
+          </lucide-icon>
+
+          Save Q&A
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

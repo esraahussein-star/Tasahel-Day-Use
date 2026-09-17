@@ -1,0 +1,1157 @@
+<div
+  class="place-details-page"
+  dir="rtl">
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل ملف المكان...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       CONTENT
+  ====================================================== -->
+
+  <ng-container
+    *ngIf="
+      !loading
+      &&
+      !errorMessage
+      &&
+      place
+    ">
+
+    <!-- =================================================
+         BACK
+    ================================================== -->
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()">
+
+      <lucide-icon
+        [img]="ArrowRight"
+        [size]="17">
+      </lucide-icon>
+
+      الرجوع إلى الأماكن
+
+    </button>
+
+
+    <!-- =================================================
+         HERO
+    ================================================== -->
+
+    <section class="place-hero">
+
+      <div class="place-hero-image">
+
+        <img
+          *ngIf="place.image"
+          [src]="place.image"
+          [alt]="place.name">
+
+
+        <div
+          *ngIf="!place.image"
+          class="hero-placeholder">
+
+          <lucide-icon
+            [img]="Building2"
+            [size]="38">
+          </lucide-icon>
+
+        </div>
+
+      </div>
+
+
+      <div class="place-hero-content">
+
+        <div class="hero-main">
+
+          <div>
+
+            <div class="hero-area">
+
+              <lucide-icon
+                [img]="MapPin"
+                [size]="15">
+              </lucide-icon>
+
+              <span>
+                {{ place.area || 'منطقة غير محددة' }}
+              </span>
+
+            </div>
+
+
+            <h1>
+              {{ place.name }}
+            </h1>
+
+
+            <p>
+              {{
+                place.description
+                ||
+                'لا يوجد وصف متاح لهذا المكان.'
+              }}
+            </p>
+
+          </div>
+
+
+          <span class="availability-badge">
+
+            <span class="availability-dot"></span>
+
+            متاح
+
+          </span>
+
+        </div>
+
+
+        <div
+          *ngIf="tags.length > 0"
+          class="hero-tags">
+
+          <span
+            *ngFor="
+              let tag of tags;
+              trackBy: trackByIndex
+            ">
+
+            {{ tag }}
+
+          </span>
+
+        </div>
+
+
+        <div class="hero-stats">
+
+          <div>
+
+            <span class="stat-icon">
+
+              <lucide-icon
+                [img]="BadgeDollarSign"
+                [size]="18">
+              </lucide-icon>
+
+            </span>
+
+
+            <div>
+
+              <span>
+                يبدأ من
+              </span>
+
+              <strong *ngIf="basePrice">
+                {{ basePrice | number }} ج.م
+              </strong>
+
+              <strong *ngIf="!basePrice">
+                حسب الباقة
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <span class="stat-icon">
+
+              <lucide-icon
+                [img]="WalletCards"
+                [size]="18">
+              </lucide-icon>
+
+            </span>
+
+
+            <div>
+
+              <span>
+                الباقات
+              </span>
+
+              <strong>
+                {{ packages.length }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div>
+
+            <span class="stat-icon">
+
+              <lucide-icon
+                [img]="Sparkles"
+                [size]="18">
+              </lucide-icon>
+
+            </span>
+
+
+            <div>
+
+              <span>
+                الخدمات
+              </span>
+
+              <strong>
+                {{ services.length }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================
+         TABS
+    ================================================== -->
+
+    <nav class="place-tabs">
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'overview'"
+        (click)="setTab('overview')">
+
+        <lucide-icon
+          [img]="Info"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          نظرة عامة
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'pricing'"
+        (click)="setTab('pricing')">
+
+        <lucide-icon
+          [img]="WalletCards"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          الباقات والأسعار
+        </span>
+
+        <small *ngIf="pricingCount > 0">
+          {{ pricingCount }}
+        </small>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'policies'"
+        (click)="setTab('policies')">
+
+        <lucide-icon
+          [img]="ShieldCheck"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          السياسات والحجز
+        </span>
+
+        <small *ngIf="policiesCount > 0">
+          {{ policiesCount }}
+        </small>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'guide'"
+        (click)="setTab('guide')">
+
+        <lucide-icon
+          [img]="BookOpen"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          دليل الموظف
+        </span>
+
+        <small *ngIf="guideCount > 0">
+          {{ guideCount }}
+        </small>
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="activeTab === 'faq'"
+        (click)="setTab('faq')">
+
+        <lucide-icon
+          [img]="CircleHelp"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          الأسئلة الشائعة
+        </span>
+
+        <small *ngIf="faqCount > 0">
+          {{ faqCount }}
+        </small>
+
+      </button>
+
+    </nav>
+
+
+    <!-- =====================================================
+         OVERVIEW TAB
+    ====================================================== -->
+
+    <section
+      *ngIf="activeTab === 'overview'"
+      class="tab-content">
+
+      <!-- INTRO -->
+
+      <section class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              عن المكان
+            </span>
+
+            <h2>
+              نظرة عامة
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="large-copy">
+
+          {{
+            place.description
+            ||
+            'لا يوجد وصف إضافي للمكان.'
+          }}
+
+        </div>
+
+      </section>
+
+
+      <!-- SERVICES -->
+
+      <section
+        *ngIf="services.length > 0"
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              المرافق
+            </span>
+
+            <h2>
+              الخدمات والمرافق
+            </h2>
+
+            <p>
+              الخدمات المتاحة للعميل داخل المكان.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="services-list">
+
+          <div
+            *ngFor="
+              let service of services;
+              trackBy: trackByIndex
+            "
+            class="service-row">
+
+            <span class="service-check">
+
+              <lucide-icon
+                [img]="CheckCircle2"
+                [size]="17">
+              </lucide-icon>
+
+            </span>
+
+
+            <div>
+
+              <strong>
+                {{ getItemTitle(service) }}
+              </strong>
+
+              <p
+                *ngIf="getItemDescription(service)">
+
+                {{ getItemDescription(service) }}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- OVERVIEW KNOWLEDGE -->
+
+      <section
+        *ngFor="
+          let item of overviewKnowledge;
+          trackBy: trackByKnowledgeId
+        "
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              {{ getCategoryLabel(item.category) }}
+            </span>
+
+            <h2>
+              {{ item.title }}
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="knowledge-copy">
+          {{ item.content }}
+        </div>
+
+      </section>
+
+
+      <div
+        *ngIf="!hasOverviewContent"
+        class="empty-tab">
+
+        لا توجد معلومات عامة مسجلة لهذا المكان.
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRICING TAB
+    ====================================================== -->
+
+    <section
+      *ngIf="activeTab === 'pricing'"
+      class="tab-content">
+
+      <!-- BASE PRICE -->
+
+      <section class="pricing-summary">
+
+        <div>
+
+          <span>
+            السعر المبدئي
+          </span>
+
+          <strong *ngIf="basePrice">
+            {{ basePrice | number }} ج.م
+          </strong>
+
+          <strong *ngIf="!basePrice">
+            السعر حسب الباقة
+          </strong>
+
+          <p>
+            السعر النهائي يعتمد على الباقة وعدد الأفراد والإضافات.
+          </p>
+
+        </div>
+
+
+        <span class="pricing-summary-icon">
+
+          <lucide-icon
+            [img]="BadgeDollarSign"
+            [size]="28">
+          </lucide-icon>
+
+        </span>
+
+      </section>
+
+
+      <!-- PACKAGES -->
+
+      <section class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              الخيارات المتاحة
+            </span>
+
+            <h2>
+              الباقات
+            </h2>
+
+            <p>
+              تفاصيل كل باقة وعدد الأفراد والمواعيد والسعر.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="packages.length === 0"
+          class="section-empty">
+
+          لا توجد باقات مسجلة.
+
+        </div>
+
+
+        <div
+          *ngIf="packages.length > 0"
+          class="packages-list">
+
+          <article
+            *ngFor="
+              let package of packages;
+              trackBy: trackByIndex
+            "
+            class="package-row">
+
+            <div class="package-main">
+
+              <span class="package-label">
+                باقة
+              </span>
+
+              <h3>
+                {{ getItemTitle(package) }}
+              </h3>
+
+              <p
+                *ngIf="getItemDescription(package)">
+
+                {{ getItemDescription(package) }}
+
+              </p>
+
+            </div>
+
+
+            <div class="package-info">
+
+              <div
+                *ngIf="getPackageGuests(package)">
+
+                <lucide-icon
+                  [img]="Users"
+                  [size]="16">
+                </lucide-icon>
+
+                <span>
+                  {{ getPackageGuests(package) }}
+                </span>
+
+              </div>
+
+
+              <div
+                *ngIf="getPackageTime(package)">
+
+                <lucide-icon
+                  [img]="Clock3"
+                  [size]="16">
+                </lucide-icon>
+
+                <span>
+                  {{ getPackageTime(package) }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="package-price">
+
+              <span>
+                السعر
+              </span>
+
+              <strong
+                *ngIf="getItemPrice(package) as price">
+
+                {{ price | number }}
+                <small>
+                  ج.م
+                </small>
+
+              </strong>
+
+              <strong
+                *ngIf="!getItemPrice(package)">
+
+                حسب الطلب
+
+              </strong>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- EXTRAS -->
+
+      <section
+        *ngIf="extras.length > 0"
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              خدمات إضافية
+            </span>
+
+            <h2>
+              الإضافات
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="extras-table">
+
+          <div
+            *ngFor="
+              let extra of extras;
+              trackBy: trackByIndex
+            "
+            class="extra-item">
+
+            <div>
+
+              <strong>
+                {{ getItemTitle(extra) }}
+              </strong>
+
+              <p
+                *ngIf="getItemDescription(extra)">
+
+                {{ getItemDescription(extra) }}
+
+              </p>
+
+            </div>
+
+
+            <strong
+              *ngIf="getItemPrice(extra) as price"
+              class="extra-price">
+
+              {{ price | number }}
+              ج.م
+
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <div
+        *ngIf="!hasPricingContent"
+        class="empty-tab">
+
+        لا توجد أسعار أو باقات مسجلة لهذا المكان.
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         POLICIES TAB
+    ====================================================== -->
+
+    <section
+      *ngIf="activeTab === 'policies'"
+      class="tab-content">
+
+      <!-- POLICIES -->
+
+      <section
+        *ngIf="policyKnowledge.length > 0"
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              سياسات المكان
+            </span>
+
+            <h2>
+              السياسات والشروط
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="knowledge-stack">
+
+          <article
+            *ngFor="
+              let item of policyKnowledge;
+              trackBy: trackByKnowledgeId
+            "
+            class="knowledge-item policy-item">
+
+            <h3>
+              {{ item.title }}
+            </h3>
+
+            <div class="knowledge-copy">
+              {{ item.content }}
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- BOOKING -->
+
+      <section
+        *ngIf="bookingKnowledge.length > 0"
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              إجراءات العمل
+            </span>
+
+            <h2>
+              الحجز
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="knowledge-stack">
+
+          <article
+            *ngFor="
+              let item of bookingKnowledge;
+              trackBy: trackByKnowledgeId
+            "
+            class="knowledge-item booking-item">
+
+            <h3>
+              {{ item.title }}
+            </h3>
+
+            <div class="knowledge-copy">
+              {{ item.content }}
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- PAYMENT -->
+
+      <section
+        *ngIf="paymentKnowledge.length > 0"
+        class="content-section">
+
+        <div class="content-section-head">
+
+          <div>
+
+            <span class="eyebrow">
+              الحسابات
+            </span>
+
+            <h2>
+              الدفع
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div class="knowledge-stack">
+
+          <article
+            *ngFor="
+              let item of paymentKnowledge;
+              trackBy: trackByKnowledgeId
+            "
+            class="knowledge-item payment-item">
+
+            <h3>
+              {{ item.title }}
+            </h3>
+
+            <div class="knowledge-copy">
+              {{ item.content }}
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <div
+        *ngIf="!hasPoliciesContent"
+        class="empty-tab">
+
+        لا توجد سياسات أو معلومات حجز ودفع مسجلة.
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         AGENT GUIDE TAB
+    ====================================================== -->
+
+    <section
+      *ngIf="activeTab === 'guide'"
+      class="tab-content">
+
+      <!-- GUIDE HEADER -->
+
+      <section class="guide-intro">
+
+        <div class="guide-icon-big">
+          ★
+        </div>
+
+
+        <div>
+
+          <span>
+            دليل الموظف
+          </span>
+
+          <h2>
+            مرجع سريع أثناء مكالمة العميل
+          </h2>
+
+          <p>
+            استخدمي المعلومات الموجودة هنا قبل تأكيد أي تفاصيل نهائية.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- GUIDE ITEMS -->
+
+      <section
+        *ngIf="guideKnowledge.length > 0"
+        class="guide-list">
+
+        <article
+          *ngFor="
+            let item of guideKnowledge;
+            trackBy: trackByKnowledgeId
+          "
+          class="guide-item">
+
+          <div class="guide-item-number">
+            ✓
+          </div>
+
+
+          <div>
+
+            <span>
+              دليل الموظف
+            </span>
+
+            <h3>
+              {{ item.title }}
+            </h3>
+
+            <div class="knowledge-copy">
+              {{ item.content }}
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <div
+        *ngIf="!hasGuideContent"
+        class="empty-tab">
+
+        لا توجد تعليمات خاصة للموظف لهذا المكان.
+
+      </div>
+
+
+      <!-- LAST UPDATE -->
+
+      <section class="last-update">
+
+        <lucide-icon
+          [img]="CalendarDays"
+          [size]="17">
+        </lucide-icon>
+
+
+        <div>
+
+          <span>
+            آخر تحديث للمعلومات
+          </span>
+
+          <strong *ngIf="lastUpdatedAt">
+
+            {{
+              lastUpdatedAt
+                | date:'dd/MM/yyyy - hh:mm a'
+            }}
+
+          </strong>
+
+          <strong *ngIf="!lastUpdatedAt">
+            غير محدد
+          </strong>
+
+        </div>
+
+      </section>
+
+    </section>
+
+
+    <!-- =====================================================
+         FAQ TAB
+    ====================================================== -->
+
+    <section
+      *ngIf="activeTab === 'faq'"
+      class="tab-content">
+
+      <section class="faq-header">
+
+        <div>
+
+          <span class="eyebrow">
+            مرجع سريع
+          </span>
+
+          <h2>
+            الأسئلة الشائعة
+          </h2>
+
+          <p>
+            الأسئلة اللي غالبًا العميل هيسألها أثناء المكالمة.
+          </p>
+
+        </div>
+
+
+        <div class="faq-count">
+
+          <strong>
+            {{ faqCount }}
+          </strong>
+
+          <span>
+            سؤال
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <div
+        *ngIf="faqKnowledge.length > 0"
+        class="faq-list">
+
+        <article
+          *ngFor="
+            let faq of faqKnowledge;
+            trackBy: trackByKnowledgeId
+          "
+          class="faq-item"
+          [class.open]="isFaqOpen(faq.id)">
+
+          <button
+            type="button"
+            (click)="toggleFaq(faq.id)">
+
+            <div>
+
+              <span class="faq-question-label">
+                سؤال
+              </span>
+
+              <strong>
+                {{ faq.title }}
+              </strong>
+
+            </div>
+
+
+            <span class="faq-toggle">
+
+              {{
+                isFaqOpen(faq.id)
+                  ? '−'
+                  : '+'
+              }}
+
+            </span>
+
+          </button>
+
+
+          <div
+            *ngIf="isFaqOpen(faq.id)"
+            class="faq-answer">
+
+            <span>
+              الإجابة
+            </span>
+
+            <p>
+              {{ faq.content }}
+            </p>
+
+          </div>
+
+        </article>
+
+      </div>
+
+
+      <div
+        *ngIf="!hasFaqContent"
+        class="empty-tab">
+
+        لا توجد أسئلة شائعة مسجلة لهذا المكان.
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

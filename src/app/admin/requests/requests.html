@@ -1,0 +1,903 @@
+<div class="requests-page" dir="rtl">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="page-intro">
+
+    <div>
+
+      <span class="page-label">
+        إدارة الحجوزات
+      </span>
+
+      <h2>
+        طلبات الحجز
+      </h2>
+
+      <p>
+        متابعة طلبات Day Use، بيانات العملاء وحالة كل طلب
+      </p>
+
+    </div>
+
+
+    <div class="page-summary">
+
+      <span>
+        النتائج الحالية
+      </span>
+
+      <strong>
+        {{ filteredRequests.length }}
+      </strong>
+
+      <small>
+        من {{ requests.length }} طلب
+      </small>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="filters-card">
+
+    <div class="filters-title">
+
+      <div>
+
+        <strong>
+          البحث والتصفية
+        </strong>
+
+        <span>
+          البحث باسم العميل، رقم الهاتف أو المكان
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="البحث بالاسم، رقم الهاتف أو المكان">
+
+    </div>
+
+
+    <div class="filters-row">
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')">
+
+        <span>
+          جميع الطلبات
+        </span>
+
+        <strong>
+          {{ getFilterCount('all') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'pending'"
+        (click)="setFilter('pending')">
+
+        <span>
+          طلبات جديدة
+        </span>
+
+        <strong>
+          {{ getFilterCount('pending') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'confirmed'"
+        (click)="setFilter('confirmed')">
+
+        <span>
+          تم التأكيد
+        </span>
+
+        <strong>
+          {{ getFilterCount('confirmed') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'completed'"
+        (click)="setFilter('completed')">
+
+        <span>
+          مكتملة
+        </span>
+
+        <strong>
+          {{ getFilterCount('completed') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="activeFilter === 'cancelled'"
+        (click)="setFilter('cancelled')">
+
+        <span>
+          ملغاة
+        </span>
+
+        <strong>
+          {{ getFilterCount('cancelled') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        *ngIf="activeFilter !== 'all' || searchTerm"
+        type="button"
+        class="clear-button"
+        (click)="clearFilters()">
+
+        إعادة ضبط
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل طلبات الحجز...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       REQUEST TABLE
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="requests-card">
+
+    <div class="table-head">
+
+      <div>
+
+        <span class="section-label">
+          سجل الطلبات
+        </span>
+
+        <h3>
+          أحدث طلبات الحجز
+        </h3>
+
+        <p>
+          {{ filteredRequests.length }}
+          طلب مطابق لمعايير البحث الحالية
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="filteredRequests.length === 0"
+      class="empty-state">
+
+      لا توجد طلبات مطابقة لمعايير البحث الحالية.
+
+    </div>
+
+
+    <div
+      *ngIf="filteredRequests.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              العميل
+            </th>
+
+            <th>
+              المكان
+            </th>
+
+            <th>
+              موعد الحجز
+            </th>
+
+           
+            <th>
+              الإجمالي التقريبي
+            </th>
+
+            <th>
+              الحالة
+            </th>
+
+            <th class="action-column">
+              الإجراءات
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let request of paginatedRequests;
+              trackBy: trackByRequestId
+            ">
+
+            <!-- CUSTOMER -->
+            <td>
+
+              <div class="customer-cell">
+
+                <div class="customer-avatar">
+
+                  {{
+                    (request.name || '?')
+                      .charAt(0)
+                  }}
+
+                </div>
+
+
+                <div>
+
+                  <strong>
+
+                    {{
+                      request.name ||
+                      'عميل غير مسجل'
+                    }}
+
+                  </strong>
+
+                  <small>
+
+                    {{
+                      request.phone ||
+                      'رقم الهاتف غير مسجل'
+                    }}
+
+                  </small>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- PLACE -->
+            <td>
+
+              <span class="place-name">
+
+                {{
+                  request.place_name ||
+                  'لم يتم تحديد المكان'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- BOOKING DATE / TIME -->
+            <td>
+
+              <div class="booking-time-cell">
+
+                <strong>
+
+                  {{
+                    request.date
+                      ? (request.date | date:'dd/MM/yyyy')
+                      : 'غير محدد'
+                  }}
+
+                </strong>
+
+                <small>
+
+                  {{
+                    request.time ||
+                    'الوقت غير محدد'
+                  }}
+
+                </small>
+
+              </div>
+
+            </td>
+
+
+            <!-- GUESTS -->
+            <!-- <td>
+
+              <span class="guests-value">
+
+                {{
+                  request.guests ||
+                  0
+                }}
+
+              </span>
+
+            </td> -->
+
+
+            <!-- TOTAL -->
+            <td>
+
+              <strong class="total-price">
+
+                {{
+                  (request.estimated_total || 0)
+                    | number
+                }}
+
+                جنيه
+
+              </strong>
+
+            </td>
+
+
+            <!-- STATUS -->
+            <td>
+
+              <span
+                class="request-status"
+                [attr.data-status]="request.status">
+
+                <span class="badge-dot"></span>
+
+                {{
+                  getStatusLabel(
+                    request.status
+                  )
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- ACTION -->
+            <td class="action-column">
+
+              <button
+                type="button"
+                class="open-button"
+                (click)="openRequest(request)">
+
+                 التفاصيل
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+    ====================================================== -->
+
+    <div
+      *ngIf="filteredRequests.length > 0"
+      class="pagination">
+
+      <div class="pagination-info">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        إلى
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredRequests.length }}
+        </strong>
+
+        طلب
+
+      </div>
+
+
+      <div class="pagination-controls">
+
+        <button
+          type="button"
+          class="page-nav"
+          [disabled]="currentPage === 1"
+          (click)="previousPage()">
+
+          السابق
+
+        </button>
+
+
+        <div class="current-page">
+
+          <span>
+            الصفحة
+          </span>
+
+          <strong>
+            {{ currentPage }}
+          </strong>
+
+          <span>
+            من {{ totalPages }}
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="page-nav"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+
+          التالي
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       REQUEST DETAILS DRAWER
+  ====================================================== -->
+
+  <div
+    *ngIf="selectedRequest"
+    class="request-overlay"
+    (click)="closeRequest()">
+
+    <aside
+      class="request-panel"
+      (click)="$event.stopPropagation()">
+
+
+      <!-- HEADER -->
+      <div class="request-panel-head">
+
+        <div class="drawer-customer">
+
+          <div class="drawer-avatar">
+
+            {{
+              (selectedRequest.name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+
+          <div>
+
+            <span class="drawer-label">
+              تفاصيل طلب الحجز
+            </span>
+
+            <h3>
+
+              {{
+                selectedRequest.name ||
+                'عميل غير مسجل'
+              }}
+
+            </h3>
+
+            <p>
+
+              {{
+                selectedRequest.phone ||
+                'رقم الهاتف غير مسجل'
+              }}
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeRequest()">
+
+          إغلاق
+
+        </button>
+
+      </div>
+
+
+      <!-- IMPORTANT SUMMARY -->
+      <div class="request-summary">
+
+        <div>
+
+          <span>
+            حالة الطلب
+          </span>
+
+          <strong>
+            {{
+              getStatusLabel(
+                selectedRequest.status
+              )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            الإجمالي التقريبي
+          </span>
+
+          <strong>
+
+            {{
+              (selectedRequest.estimated_total || 0)
+                | number
+            }}
+
+            جنيه
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- DETAILS -->
+      <div class="request-details">
+
+
+        <div class="details-section-title">
+
+          <span>
+            بيانات الحجز
+          </span>
+
+          <strong>
+            تفاصيل الرحلة
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            المكان
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.place_name ||
+              'غير محدد'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            تاريخ الحجز
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.date
+                ? (selectedRequest.date | date:'dd/MM/yyyy')
+                : 'غير محدد'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            وقت الحجز
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.time ||
+              'غير محدد'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            عدد الأفراد
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.guests ||
+              0
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            سعر الفرد
+          </span>
+
+          <strong>
+
+            {{
+              (selectedRequest.unit_price || 0)
+                | number
+            }}
+
+            جنيه
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row total-row">
+
+          <span>
+            الإجمالي التقريبي
+          </span>
+
+          <strong>
+
+            {{
+              (selectedRequest.estimated_total || 0)
+                | number
+            }}
+
+            جنيه
+
+          </strong>
+
+        </div>
+
+
+        <div class="details-section-title secondary">
+
+          <span>
+            بيانات إضافية
+          </span>
+
+          <strong>
+            تفاصيل الطلب
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            المنطقة
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.area ||
+              'غير محددة'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            الباقة
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.package ||
+              'لا توجد باقة محددة'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            الإضافات
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.extras ||
+              'لا توجد إضافات'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            ملاحظات
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.notes ||
+              'لا توجد ملاحظات'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            مصدر الطلب
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.source ||
+              'غير محدد'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>
+            تاريخ تسجيل الطلب
+          </span>
+
+          <strong>
+
+            {{
+              selectedRequest.created_at
+                | date:'dd/MM/yyyy - hh:mm a':'Africa/Cairo'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>

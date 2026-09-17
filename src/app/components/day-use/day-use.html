@@ -1,0 +1,102 @@
+
+<aside class="dayuse-panel">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <div class="dayuse-head">
+
+    <div class="dayuse-title">
+
+ <div class="dayuse-title-icon">
+  ☀️
+</div>
+
+      <div>
+        <h2>أماكن Day Use</h2>
+        <p>اختار مكان وأنا أكمل معاك التفاصيل</p>
+      </div>
+
+    </div>
+
+    <div class="count-badge">
+      {{ filteredPlaces.length }} أماكن
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       HERO
+  ====================================================== -->
+
+  <div class="dayuse-hero">
+
+    <h3>
+      خلّي اليوم على مزاجك ✨
+    </h3>
+
+    <p>
+      اختار فندق أو منتجع، وأنا أقولك السعر، عدد الأشخاص،
+      الخدمات، الأكل، المشروبات، الـAqua Park، الـSpa
+      وكل التفاصيل المهمة.
+    </p>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <div class="filter-area">
+
+    <div class="filter-scroll">
+
+      <button
+        *ngFor="let filter of filters"
+        type="button"
+        class="filter-btn"
+        [class.active]="activeFilter === filter.key"
+        (click)="setFilter(filter.key)">
+
+        {{ filter.label }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       PLACES
+  ====================================================== -->
+
+  <div class="dayuse-scroll">
+
+    <div class="place-grid">
+
+      <app-place-card
+        *ngFor="let place of filteredPlaces"
+        [place]="place"
+        (selected)="selectPlace($event)">
+      </app-place-card>
+
+
+      <!-- No Results -->
+
+      <div
+        *ngIf="filteredPlaces.length === 0"
+        class="no-results">
+
+        مفيش أماكن متاحة حاليًا.
+
+      </div>
+
+    </div>
+
+  </div>
+
+</aside>

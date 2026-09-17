@@ -1,0 +1,358 @@
+<div class="logs-page" dir="rtl">
+
+  <!-- PAGE HEADER -->
+  <div class="page-head">
+
+    <div>
+      <span class="page-label">REQUEST EVENTS</span>
+
+      <h2>سجل الأحداث</h2>
+
+      <p>
+        تابعي كل الأحداث اللي حصلت على الطلبات والمحادثات
+      </p>
+    </div>
+
+    <div class="page-count">
+      <strong>{{ filteredEvents.length }}</strong>
+      <span>من {{ events.length }} حدث</span>
+    </div>
+
+  </div>
+
+
+  <!-- FILTERS -->
+  <section class="filters-card">
+
+    <div class="search-box">
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="ابحثي بنوع الحدث أو رقم الطلب أو السيشن...">
+
+    </div>
+
+
+    <div class="filters-row">
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="selectedEventType === 'all'"
+        (click)="selectEventType('all')">
+
+        <span>الكل</span>
+
+        <strong>
+          {{ getEventTypeCount('all') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        *ngFor="let type of eventTypes"
+        type="button"
+        class="filter-button"
+        [class.active]="selectedEventType === type"
+        (click)="selectEventType(type)">
+
+        <span>
+          {{ getEventLabel(type) }}
+        </span>
+
+        <strong>
+          {{ getEventTypeCount(type) }}
+        </strong>
+
+      </button>
+
+
+      <button
+        *ngIf="selectedEventType !== 'all' || searchTerm"
+        type="button"
+        class="clear-button"
+        (click)="clearFilters()">
+
+        مسح الفلاتر
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- LOADING -->
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل السجل...
+
+  </div>
+
+
+  <!-- ERROR -->
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- EVENTS -->
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="logs-card">
+
+    <div class="table-head">
+
+      <div>
+        <h3>الأحداث الأخيرة</h3>
+
+        <p>
+          {{ filteredEvents.length }} نتيجة مطابقة
+        </p>
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="filteredEvents.length === 0"
+      class="empty-state">
+
+      مفيش أحداث مطابقة للفلتر الحالي.
+
+    </div>
+
+
+    <div
+      *ngIf="filteredEvents.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>الحدث</th>
+            <th>الطلب</th>
+            <th>السيشن</th>
+            <th>التفاصيل</th>
+            <th>التاريخ</th>
+            <th></th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let event of filteredEvents">
+
+            <!-- EVENT TYPE -->
+            <td>
+
+              <span class="event-type">
+                <span class="event-dot"></span>
+
+                {{ getEventLabel(event.event_type) }}
+              </span>
+
+            </td>
+
+
+            <!-- REQUEST -->
+            <td>
+
+              <span
+                class="id-chip"
+                [title]="event.request_id || ''">
+
+                {{ getShortId(event.request_id) }}
+
+              </span>
+
+            </td>
+
+
+            <!-- SESSION -->
+            <td>
+
+              <span
+                class="id-chip"
+                [title]="event.session_id || ''">
+
+                {{ getShortId(event.session_id) }}
+
+              </span>
+
+            </td>
+
+
+            <!-- EVENT DATA -->
+            <td>
+
+              <div
+                class="event-data-preview"
+                [title]="formatEventData(event.event_data)">
+
+                {{ formatEventData(event.event_data) }}
+
+              </div>
+
+            </td>
+
+
+            <!-- DATE -->
+            <td class="date-cell">
+
+              {{
+                event.created_at
+                  | date:'short':'Africa/Cairo'
+              }}
+
+            </td>
+
+
+            <!-- OPEN -->
+            <td>
+
+              <button
+                type="button"
+                class="open-button"
+                (click)="openEvent(event)">
+
+                عرض
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- EVENT DRAWER -->
+  <div
+    *ngIf="selectedEvent"
+    class="event-overlay"
+    (click)="closeEvent()">
+
+    <aside
+      class="event-panel"
+      (click)="$event.stopPropagation()">
+
+      <div class="event-panel-head">
+
+        <div>
+
+          <span class="drawer-label">
+            EVENT DETAILS
+          </span>
+
+          <h3>
+            {{ getEventLabel(selectedEvent.event_type) }}
+          </h3>
+
+          <p>
+            {{
+              selectedEvent.created_at
+                | date:'medium':'Africa/Cairo'
+            }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeEvent()">
+
+          إغلاق
+
+        </button>
+
+      </div>
+
+
+      <div class="event-details">
+
+        <div class="detail-row">
+
+          <span>نوع الحدث</span>
+
+          <strong>
+            {{ selectedEvent.event_type || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>Request ID</span>
+
+          <strong class="full-id">
+            {{ selectedEvent.request_id || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>Session ID</span>
+
+          <strong class="full-id">
+            {{ selectedEvent.session_id || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span>التاريخ</span>
+
+          <strong>
+            {{
+              selectedEvent.created_at
+                | date:'medium':'Africa/Cairo'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="json-section">
+
+          <span>
+            Event Data
+          </span>
+
+          <pre>{{ formatEventData(selectedEvent.event_data) }}</pre>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>

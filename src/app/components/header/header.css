@@ -1,0 +1,497 @@
+:host {
+  display: block;
+  width: 100%;
+  direction: rtl;
+
+  font-family:
+    "Cairo",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  --green: #16965a;
+  --green-dark: #0f7c49;
+
+  --text: #1a2820;
+  --muted: #89958e;
+
+  --border: #e6ece8;
+  --surface-soft: #f8fbf9;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.top-header {
+  width: 100%;
+  min-height: 72px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    auto
+    minmax(220px, 1fr);
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 10px 24px;
+
+  box-sizing: border-box;
+
+  background:
+    rgba(255, 255, 255, 0.98);
+
+  border-bottom:
+    1px solid #edf1ee;
+
+  box-shadow:
+    0 3px 18px
+    rgba(22, 47, 31, 0.025);
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.brand-area {
+  justify-self: start;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.logo-box {
+  width: 44px;
+  height: 44px;
+
+  flex: 0 0 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  background:
+    #f4faf6;
+
+  border:
+    1px solid #e0ebe4;
+}
+
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  padding: 5px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   BRAND TEXT
+========================================================= */
+
+.brand-text {
+  min-width: 0;
+}
+
+
+.brand-text h1 {
+  margin: 0;
+
+  color:
+    var(--text);
+
+  font-size: 18px;
+  line-height: 1.2;
+
+  font-weight: 600;
+
+  letter-spacing: -0.1px;
+}
+
+
+.brand-text p {
+  margin: 4px 0 0;
+
+  color:
+    #9aa39e;
+
+  font-size: 10px;
+  line-height: 1.2;
+
+  font-weight: 400;
+
+  direction: ltr;
+  text-align: right;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.header-nav {
+  justify-self: center;
+
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 3px;
+
+  border-radius: 11px;
+
+
+
+  border:
+    1px solid #edf1ee;
+}
+
+
+/* =========================================================
+   NAV ITEM
+========================================================= */
+
+.nav-item {
+  position: relative;
+
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    6px 13px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background:
+    transparent;
+
+  color:
+    #7d8982;
+
+  font-family:
+    inherit;
+
+  font-size:
+    11px;
+
+  font-weight:
+    400;
+
+  white-space:
+    nowrap;
+
+  cursor:
+    pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+.nav-item:hover {
+  color:
+    var(--green-dark);
+
+  background:
+    #ffffff;
+}
+
+
+.nav-item.active {
+  color:
+    var(--green-dark);
+
+  background:
+    #ffffff;
+
+  font-weight:
+    500;
+
+
+}
+
+
+/* خط خفيف تحت العنصر النشط */
+
+.nav-item.active::after {
+  content: "";
+
+  position: absolute;
+
+  right: 14px;
+  left: 14px;
+
+  bottom: -4px;
+
+  height: 1.5px;
+
+  border-radius:
+    20px;
+
+  background:
+    var(--green);
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.header-actions {
+  justify-self: end;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+/* =========================================================
+   STAT
+========================================================= */
+
+.header-stat {
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding:
+    6px 10px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid var(--border);
+
+  border-radius:
+    9px;
+
+  background:
+    #ffffff;
+
+  color:
+    #7d8982;
+
+  font-size:
+    10px;
+
+  font-weight:
+    400;
+
+  white-space:
+    nowrap;
+}
+
+
+.header-stat strong {
+  color:
+    var(--green-dark);
+
+  font-size:
+    11px;
+
+  font-weight:
+    600;
+}
+
+
+/* =========================================================
+   ONLINE
+========================================================= */
+
+.online-badge {
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding:
+    6px 10px;
+
+  box-sizing:
+    border-box;
+
+  border:
+    1px solid #e2eee6;
+
+  border-radius:
+    9px;
+
+  background:
+    #f8fcf9;
+
+  color:
+    #527060;
+
+  font-size:
+    10px;
+
+  font-weight:
+    500;
+
+  white-space:
+    nowrap;
+}
+
+
+.online-dot {
+  width: 6px;
+  height: 6px;
+
+  flex:
+    0 0 6px;
+
+  border-radius:
+    50%;
+
+  background:
+    #1ca35f;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(28, 163, 95, 0.07);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .top-header {
+    grid-template-columns:
+      1fr
+      auto;
+
+    gap: 12px;
+
+    padding:
+      10px 18px;
+  }
+
+
+  .header-nav {
+    display: none;
+  }
+
+
+  .brand-area {
+    justify-self: start;
+  }
+
+
+  .header-actions {
+    justify-self: end;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .top-header {
+    min-height: 64px;
+
+    padding:
+      9px 13px;
+  }
+
+
+  .logo-box {
+    width: 39px;
+    height: 39px;
+
+    flex-basis:
+      39px;
+
+    border-radius:
+      10px;
+  }
+
+
+  .brand-area {
+    gap:
+      8px;
+  }
+
+
+  .brand-text h1 {
+    font-size:
+      16px;
+  }
+
+
+  .brand-text p {
+    font-size:
+      9px;
+  }
+
+
+  .header-stat {
+    display:
+      none;
+  }
+
+
+  .online-badge {
+    min-height:
+      31px;
+
+    padding:
+      5px 8px;
+
+    font-size:
+      9px;
+  }
+
+}
+
+
+@media (max-width: 420px) {
+
+  .brand-text p {
+    display:
+      none;
+  }
+
+}

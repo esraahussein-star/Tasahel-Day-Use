@@ -1,0 +1,393 @@
+<div
+  class="account-shell"
+  dir="rtl">
+
+  <aside class="account-sidebar">
+
+    <div class="sidebar-brand">
+
+      <div class="brand-mark">
+
+        <img
+          src="/tasahel-logo.png"
+          alt="Tasahel">
+
+      </div>
+
+
+      <div>
+
+        <strong>
+          Tasahel
+        </strong>
+
+        <span>
+          Accounts Workspace
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="sidebar-user">
+
+      <div class="user-avatar">
+
+        {{
+          (currentUser?.full_name || '?')
+            .charAt(0)
+        }}
+
+      </div>
+
+
+      <div>
+
+        <strong>
+          {{ currentUser?.full_name || 'Accounts' }}
+        </strong>
+
+        <span>
+          Accounts
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <nav class="account-nav">
+
+      <span class="nav-label">
+        Accounts
+      </span>
+
+
+      <!-- Dashboard -->
+
+      <a
+        routerLink="/account"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          exact: true
+        }">
+
+        <span class="nav-icon">
+
+          <lucide-icon
+            [img]="LayoutDashboard"
+            [size]="18">
+          </lucide-icon>
+
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- Payment Requests -->
+
+      <a
+        routerLink="/account/requests"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+
+          <lucide-icon
+            [img]="ReceiptText"
+            [size]="18">
+          </lucide-icon>
+
+        </span>
+
+        <span>
+          Payment Requests
+        </span>
+
+
+        <strong
+          *ngIf="totalAttentionCount > 0"
+          class="nav-badge">
+
+          {{ totalAttentionCount }}
+
+        </strong>
+
+      </a>
+
+
+      <!-- Management -->
+
+      <span class="nav-label secondary">
+        Management
+      </span>
+
+
+      <!-- Price Management -->
+
+      <a
+        routerLink="/account/prices"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+
+          <lucide-icon
+            [img]="BadgeDollarSign"
+            [size]="18">
+          </lucide-icon>
+
+        </span>
+
+        <span>
+          Price Management
+        </span>
+
+      </a>
+<a
+  routerLink="/account/payment-methods"
+  routerLinkActive="active">
+
+  <span class="nav-icon">
+
+    <lucide-icon
+      [img]="CreditCard"
+      [size]="18">
+    </lucide-icon>
+
+  </span>
+
+  <span>
+    Payment Methods
+  </span>
+
+</a>
+
+      <!-- Follow-up -->
+
+      <span class="nav-label secondary">
+        Follow-up
+      </span>
+
+
+      <!-- History -->
+
+      <a
+        routerLink="/account/history"
+        routerLinkActive="active">
+
+        <span class="nav-icon">
+
+          <lucide-icon
+            [img]="History"
+            [size]="18">
+          </lucide-icon>
+
+        </span>
+
+        <span>
+          History
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+      <button
+        type="button"
+        (click)="logout()">
+
+        <lucide-icon
+          [img]="LogOut"
+          [size]="17">
+        </lucide-icon>
+
+        Logout
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <main class="account-main">
+
+    <header class="account-topbar">
+
+      <div class="topbar-title">
+
+        <span>
+          Accounts
+        </span>
+
+        <strong>
+          Payment Review & Confirmation
+        </strong>
+
+      </div>
+
+
+      <div class="topbar-actions">
+
+        <div class="notifications-wrapper">
+
+          <button
+            type="button"
+            class="notification-button"
+            [class.active]="totalAttentionCount > 0"
+            (click)="toggleNotifications($event)">
+
+            <lucide-icon
+              [img]="Bell"
+              [size]="19">
+            </lucide-icon>
+
+
+            <span
+              *ngIf="totalAttentionCount > 0"
+              class="notification-count">
+
+              {{ totalAttentionCount }}
+
+            </span>
+
+          </button>
+
+
+          <div
+            *ngIf="notificationsOpen"
+            class="notifications-dropdown"
+            (click)="stopDropdownClick($event)">
+
+            <div class="dropdown-head">
+
+              <div>
+
+                <strong>
+                  Account Notifications
+                </strong>
+
+                <span>
+                  Requests requiring your attention
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- Pending -->
+
+            <button
+              type="button"
+              class="attention-item"
+              (click)="openPendingRequests()">
+
+              <span class="attention-icon pending">
+
+                <lucide-icon
+                  [img]="WalletCards"
+                  [size]="17">
+                </lucide-icon>
+
+              </span>
+
+
+              <div>
+
+                <strong>
+                  Pending Review
+                </strong>
+
+                <span>
+                  {{ pendingCount }} requests
+                </span>
+
+              </div>
+
+            </button>
+
+
+            <!-- Under Review -->
+
+            <button
+              type="button"
+              class="attention-item"
+              (click)="openReviewRequests()">
+
+              <span class="attention-icon review">
+
+                <lucide-icon
+                  [img]="ReceiptText"
+                  [size]="17">
+                </lucide-icon>
+
+              </span>
+
+
+              <div>
+
+                <strong>
+                  Under Review
+                </strong>
+
+                <span>
+                  {{ reviewCount }} requests
+                </span>
+
+              </div>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="profile-chip">
+
+          <div>
+
+            <strong>
+              {{ currentUser?.full_name }}
+            </strong>
+
+            <span>
+              Accounts
+            </span>
+
+          </div>
+
+
+          <div class="profile-avatar">
+
+            {{
+              (currentUser?.full_name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <section class="account-content">
+
+      <router-outlet></router-outlet>
+
+    </section>
+
+  </main>
+
+</div>

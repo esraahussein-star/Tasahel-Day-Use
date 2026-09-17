@@ -1,0 +1,1320 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  --brand: #176f49;
+  --brand-dark: #0f5738;
+  --brand-soft: #edf7f1;
+
+  --text: #17221c;
+  --text-soft: #5f6c64;
+  --muted: #8a958e;
+
+  --border: #e2e8e4;
+  --border-soft: #edf1ee;
+
+  --green: #177247;
+  --green-soft: #eaf7ef;
+
+  --red: #b4514b;
+  --red-soft: #fff1f0;
+
+  font-family:
+    "Cairo",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.prices-page {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+
+  padding-bottom: 32px;
+
+  direction: rtl;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+}
+
+.page-title {
+  min-width: 0;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--brand);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.04em;
+}
+
+.page-head h1 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.page-head p {
+  margin: 4px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
+
+.refresh-button {
+  min-height: 39px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+  border-color: #c8d9cf;
+
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+}
+
+.refresh-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.message {
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.message.success {
+  border: 1px solid #cfe4d7;
+
+  background: var(--green-soft);
+
+  color: var(--green);
+}
+
+.message.error {
+  border: 1px solid #eed4d1;
+
+  background: var(--red-soft);
+
+  color: var(--red);
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.search-box {
+  position: relative;
+
+  width: min(420px, 100%);
+}
+
+.search-box lucide-icon {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  transform: translateY(-50%);
+
+  color: var(--muted);
+
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 100%;
+  height: 40px;
+
+  padding: 0 38px 0 10px;
+
+  border: 1px solid #dce4df;
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #fafcfb;
+
+  color: var(--text);
+
+  font-size: 11px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.search-box input:focus {
+  border-color: #a9c7b4;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 3px rgba(23, 111, 73, 0.05);
+}
+
+.search-box input::placeholder {
+  color: var(--muted);
+}
+
+.place-count {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.place-count span {
+  color: var(--muted);
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+.table-card,
+.state-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 15px
+    rgba(20, 55, 35, 0.025);
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+.state-card {
+  min-height: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 28px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  text-align: center;
+}
+
+.table-scroll {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+table {
+  width: 100%;
+
+  min-width: 900px;
+
+  border-collapse: collapse;
+
+  direction: rtl;
+}
+
+thead {
+  background: #f8faf9;
+}
+
+th,
+td {
+  padding: 13px 14px;
+
+  border-bottom:
+    1px solid var(--border-soft);
+
+  text-align: right;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+td {
+  color: var(--text);
+
+  font-size: 12px;
+}
+
+tbody tr {
+  transition:
+    background 0.14s ease;
+}
+
+tbody tr:hover {
+  background: #fcfdfc;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+/* =========================================================
+   PLACE CELL
+========================================================= */
+
+.place-cell {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.place-cell strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-cell span {
+  color: var(--muted);
+
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   PRICE VALUES
+========================================================= */
+
+.price-value {
+  display: inline-flex;
+  align-items: baseline;
+
+  gap: 4px;
+
+  white-space: nowrap;
+}
+
+.price-value strong {
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.price-value span {
+  color: var(--muted);
+
+  font-size: 8px;
+}
+
+.price-value.selling strong {
+  color: var(--brand-dark);
+}
+
+.price-value.profit strong {
+  color: var(--green);
+}
+
+.margin-value {
+  color: var(--text-soft);
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-badge {
+  min-height: 27px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+
+  background: var(--green-soft);
+
+  color: var(--green);
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.status-badge.inactive {
+  background: #f1f3f2;
+
+  color: #6c756f;
+}
+
+
+/* =========================================================
+   EDIT BUTTON
+========================================================= */
+
+.edit-button {
+  min-height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: var(--brand-dark);
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.edit-button:hover {
+  border-color: #c9d8ce;
+
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty-cell {
+  padding: 28px !important;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  text-align: center !important;
+}
+
+
+/* =========================================================
+   MODAL BACKDROP
+========================================================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(12, 24, 17, 0.32);
+
+  backdrop-filter: blur(2px);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.price-modal {
+  width: min(520px, 94vw);
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 18px 50px
+    rgba(10, 35, 20, 0.16);
+
+  direction: rtl;
+}
+
+
+/* =========================================================
+   MODAL HEADER
+========================================================= */
+
+.modal-head {
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  padding: 14px 16px;
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+.modal-head > div {
+  min-width: 0;
+}
+
+.modal-head span {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 9px;
+}
+
+.modal-head strong {
+  display: block;
+
+  margin-top: 2px;
+
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 14px;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close-button {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: var(--text-soft);
+
+  cursor: pointer;
+}
+
+.close-button:hover:not(:disabled) {
+  background: #f4f7f5;
+
+  color: var(--text);
+}
+
+
+/* =========================================================
+   MODAL BODY
+========================================================= */
+
+.modal-body {
+  padding: 16px;
+}
+
+.price-fields {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.price-fields label {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.price-fields label > span {
+  color: var(--text-soft);
+
+  font-size: 9px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   MONEY INPUT
+========================================================= */
+
+.money-input {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 10px;
+
+  border: 1px solid #dbe4de;
+  border-radius: 8px;
+
+  background: #fafcfb;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.money-input:focus-within {
+  border-color: #aac9b5;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(23, 111, 73, 0.05);
+}
+
+.money-input input {
+  width: 100%;
+  min-width: 0;
+
+  border: 0;
+  outline: none;
+
+  background: transparent;
+
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.money-input strong {
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   CALCULATION CARD
+========================================================= */
+
+.calculation-card {
+  margin-top: 14px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  padding: 12px;
+
+  border: 1px solid #d9e7de;
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0f8f3,
+      #fbfdfc
+    );
+}
+
+.calculation-card div {
+  min-width: 0;
+}
+
+.calculation-card span {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 8px;
+}
+
+.calculation-card strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--brand-dark);
+
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.calculation-note {
+  margin: 8px 0 0;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   MODAL ACTIONS
+========================================================= */
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 8px;
+
+  padding: 12px 16px;
+
+  border-top:
+    1px solid var(--border);
+
+  background: #fcfdfc;
+}
+
+.cancel-button,
+.save-button {
+  min-height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 0 12px;
+
+  border-radius: 8px;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.cancel-button {
+  border: 1px solid var(--border);
+
+  background: #ffffff;
+
+  color: var(--text-soft);
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #f7faf8;
+}
+
+.save-button {
+  border: 1px solid var(--brand);
+
+  background: var(--brand);
+
+  color: #ffffff;
+}
+
+.save-button:hover:not(:disabled) {
+  background: var(--brand-dark);
+
+  border-color: var(--brand-dark);
+}
+
+.cancel-button:disabled,
+.save-button:disabled,
+.close-button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .page-head {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .refresh-button {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .toolbar {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .place-count {
+    justify-content: flex-end;
+  }
+
+  .price-fields,
+  .calculation-card {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .save-button {
+    width: 100%;
+  }
+
+}
+/* =========================================================
+   PLACE NAME LINE
+========================================================= */
+
+.place-name-line {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  min-width: 0;
+}
+
+
+.expand-button {
+  width: 28px;
+  height: 28px;
+
+  flex: 0 0 28px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: var(--brand-dark);
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+
+.expand-button:hover {
+  border-color: #c8d9cf;
+
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+}
+
+
+/* =========================================================
+   PLACE PACKAGE META
+========================================================= */
+
+.packages-count,
+.no-packages {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+
+  margin-top: 4px;
+
+  padding: 3px 7px;
+
+  border-radius: 999px;
+
+  font-size: 7px;
+  font-weight: 600;
+}
+
+
+.packages-count {
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+}
+
+
+.no-packages {
+  background: #f2f4f3;
+
+  color: var(--muted);
+}
+
+
+.default-label {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 7px;
+}
+
+
+/* =========================================================
+   PACKAGE ROW
+========================================================= */
+
+.package-row {
+  background: #fbfdfc;
+}
+
+
+.package-row:hover {
+  background: #f7faf8 !important;
+}
+
+
+.package-row td {
+  border-bottom:
+    1px solid #e8eeea;
+}
+
+
+.package-row td:first-child {
+  position: relative;
+}
+
+
+.package-row td:first-child::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  right: 20px;
+  bottom: 0;
+
+  width: 2px;
+
+  background: #dce9e1;
+}
+
+
+/* =========================================================
+   PACKAGE CELL
+========================================================= */
+
+.package-cell {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding-right: 24px;
+}
+
+
+.package-icon {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d9e7de;
+  border-radius: 8px;
+
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+}
+
+
+.package-cell > div:last-child {
+  min-width: 0;
+}
+
+
+.package-cell strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.package-cell span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: var(--muted);
+
+  font-size: 7px;
+}
+
+
+/* =========================================================
+   PACKAGE BADGE
+========================================================= */
+
+.package-badge {
+  min-height: 25px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  padding: 0 8px;
+
+  border: 1px solid #d7e5dc;
+  border-radius: 999px;
+
+  background: #f3f8f5;
+
+  color: var(--brand-dark);
+
+  font-size: 7px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   PRICE INFO
+========================================================= */
+
+.price-info {
+  margin-bottom: 13px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #d8e6dd;
+  border-radius: 8px;
+
+  background: var(--brand-soft);
+
+  color: var(--brand-dark);
+
+  font-size: 8px;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   MODAL SUBTITLE
+========================================================= */
+
+.modal-head small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 8px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   PLACE ROW EMPHASIS
+========================================================= */
+
+.place-row {
+  background: #ffffff;
+}
+
+
+.place-row:hover {
+  background: #fcfdfc;
+}
+
+
+.place-row .place-cell > strong,
+.place-row .place-name-line strong {
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+
+/* =========================================================
+   PACKAGE PRICES
+========================================================= */
+
+.package-row .price-value strong {
+  font-size: 10px;
+}
+
+
+.package-row .price-value.selling strong {
+  color: var(--brand-dark);
+}
+
+
+.package-row .price-value.profit strong {
+  color: var(--green);
+}
+
+
+.package-row .margin-value {
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   EDIT BUTTON PACKAGE ROW
+========================================================= */
+
+.package-row .edit-button {
+  width: 31px;
+  height: 31px;
+
+  min-height: 31px;
+
+  padding: 0;
+}
+
+
+/* =========================================================
+   TABLE VISUAL HIERARCHY
+========================================================= */
+
+thead th:first-child {
+  min-width: 245px;
+}
+
+
+tbody .place-row td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+
+tbody .package-row td {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE PACKAGE ROW
+========================================================= */
+
+@media (max-width: 900px) {
+
+  table {
+    min-width: 980px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+  .package-cell {
+    padding-right: 18px;
+  }
+
+
+  .package-row td:first-child::before {
+    right: 14px;
+  }
+
+
+  .packages-count,
+  .no-packages,
+  .default-label {
+    font-size: 6.5px;
+  }
+
+}

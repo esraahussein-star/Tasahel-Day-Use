@@ -1,0 +1,1273 @@
+<div
+  class="account-requests-page"
+  dir="rtl">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <section class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        الحسابات
+      </span>
+
+      <h1>
+        طلبات الدفع
+      </h1>
+
+      <p>
+        مراجعة الطلبات المحولة من خدمة العملاء وتحديث حالة الدفع.
+      </p>
+
+    </div>
+
+
+    <div class="header-summary">
+
+      <div>
+
+        <span>
+          بانتظار المراجعة
+        </span>
+
+        <strong>
+          {{ pendingCount }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          تحت المراجعة
+        </span>
+
+        <strong>
+          {{ reviewCount }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="filters-bar">
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="17">
+      </lucide-icon>
+
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="ابحث بالعميل، الهاتف، المكان أو الباقة...">
+
+    </div>
+
+
+    <div class="filters-select-wrap">
+
+      <select
+        [(ngModel)]="activeFilter">
+
+        <option value="all">
+          كل الحالات
+        </option>
+
+        <option value="pending">
+          بانتظار المراجعة
+        </option>
+
+        <option value="under_review">
+          تحت المراجعة
+        </option>
+
+        <option value="paid">
+          تم الدفع
+        </option>
+
+        <option value="failed">
+          فشل الدفع
+        </option>
+
+        <option value="refunded">
+          تم الاسترداد
+        </option>
+
+      </select>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل طلبات الحسابات...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       EMPTY
+  ====================================================== -->
+
+  <div
+    *ngIf="
+      !loading
+      &&
+      !errorMessage
+      &&
+      filteredRequests.length === 0
+    "
+    class="empty-state">
+
+    <div class="empty-icon">
+
+      <lucide-icon
+        [img]="ReceiptText"
+        [size]="24">
+      </lucide-icon>
+
+    </div>
+
+    <strong>
+      لا توجد طلبات
+    </strong>
+
+    <p>
+      لا توجد طلبات مطابقة للحالة المختارة حاليًا.
+    </p>
+
+  </div>
+
+
+  <!-- =====================================================
+       TABLE
+  ====================================================== -->
+
+  <section
+    *ngIf="
+      !loading
+      &&
+      !errorMessage
+      &&
+      filteredRequests.length > 0
+    "
+    class="requests-card">
+
+    <div class="table-head">
+
+      <span>
+        العميل
+      </span>
+
+      <span>
+        المكان
+      </span>
+
+      <span>
+        الباقة
+      </span>
+
+      <span>
+        المبلغ
+      </span>
+
+      <span>
+        حالة الدفع
+      </span>
+
+      <span>
+        التحويل
+      </span>
+
+      <span>
+        فتح
+      </span>
+
+    </div>
+
+
+    <article
+      *ngFor="
+        let request of filteredRequests;
+        trackBy: trackByRequestId
+      "
+      class="request-row">
+
+      <!-- CUSTOMER -->
+
+      <div class="customer-cell">
+
+        <div class="customer-avatar">
+          {{ (request.name || '?').charAt(0) }}
+        </div>
+
+
+        <div>
+
+          <strong>
+            {{ request.name || 'عميل غير مسجل' }}
+          </strong>
+
+          <span>
+            {{ request.phone || 'بدون رقم هاتف' }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- PLACE -->
+
+      <div class="data-cell">
+
+        <strong>
+          {{ request.place_name || 'غير محدد' }}
+        </strong>
+
+        <span>
+          {{ request.area || '' }}
+        </span>
+
+      </div>
+
+
+      <!-- PACKAGE -->
+
+      <div class="data-cell">
+
+        <strong>
+          {{ request.package || 'غير محددة' }}
+        </strong>
+
+        <span>
+          {{ request.guests || 0 }} أفراد
+        </span>
+
+      </div>
+
+
+      <!-- AMOUNT -->
+
+      <div class="amount-cell">
+
+        <strong
+          *ngIf="getRequestAmount(request) as amount">
+
+          {{ amount | number }}
+          <small>
+            ج.م
+          </small>
+
+        </strong>
+
+
+        <span
+          *ngIf="!getRequestAmount(request)">
+
+          غير محدد
+
+        </span>
+
+      </div>
+
+
+      <!-- PAYMENT STATUS -->
+
+      <div>
+
+        <span
+          class="status-badge"
+          [attr.data-status]="request.payment_status">
+
+          {{
+            getPaymentStatusLabel(
+              request.payment_status
+            )
+          }}
+
+        </span>
+
+      </div>
+
+
+      <!-- SENT DATE -->
+
+      <div class="data-cell">
+
+        <strong
+          *ngIf="request.sent_to_accounts_at">
+
+          {{
+            request.sent_to_accounts_at
+              | date:'dd/MM/yyyy'
+          }}
+
+        </strong>
+
+        <span
+          *ngIf="request.sent_to_accounts_at">
+
+          {{
+            request.sent_to_accounts_at
+              | date:'hh:mm a'
+          }}
+
+        </span>
+
+        <span
+          *ngIf="!request.sent_to_accounts_at">
+
+          غير محدد
+
+        </span>
+
+      </div>
+
+
+      <!-- OPEN -->
+
+      <div>
+
+        <button
+          type="button"
+          class="open-request-button"
+          (click)="openRequest(request)">
+
+          <lucide-icon
+            [img]="Eye"
+            [size]="18">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       DRAWER BACKDROP
+  ====================================================== -->
+
+  <div
+    *ngIf="selectedRequest"
+    class="drawer-backdrop"
+    (click)="closeRequest()">
+  </div>
+
+
+  <!-- =====================================================
+       DRAWER
+  ====================================================== -->
+
+  <aside
+    *ngIf="selectedRequest"
+    class="request-drawer"
+    (click)="$event.stopPropagation()">
+
+    <!-- =================================================
+         DRAWER HEADER
+    ================================================== -->
+
+    <header class="drawer-header">
+
+      <div>
+
+        <span class="drawer-label">
+          مراجعة الدفع
+        </span>
+
+        <h2>
+          {{ selectedRequest.name || 'طلب العميل' }}
+        </h2>
+
+        <p>
+          {{ selectedRequest.place_name || 'مكان غير محدد' }}
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="close-drawer"
+        [disabled]="saving"
+        (click)="closeRequest()">
+
+        <lucide-icon
+          [img]="X"
+          [size]="19">
+        </lucide-icon>
+
+      </button>
+
+    </header>
+
+
+    <!-- =================================================
+         DRAWER LOADING
+    ================================================== -->
+
+    <div
+      *ngIf="drawerLoading"
+      class="drawer-loading">
+
+      جاري تحميل تفاصيل الطلب...
+
+    </div>
+
+
+    <!-- =================================================
+         DRAWER BODY
+    ================================================== -->
+
+    <div
+      *ngIf="!drawerLoading"
+      class="drawer-body">
+
+      <!-- ===============================================
+           PAYMENT STATUS HEADER
+      ================================================ -->
+
+      <section class="payment-status-card">
+
+        <div>
+
+          <span>
+            حالة الدفع الحالية
+          </span>
+
+          <strong>
+            {{
+              getPaymentStatusLabel(
+                selectedRequest.payment_status
+              )
+            }}
+          </strong>
+
+        </div>
+
+
+        <span
+          class="large-status-badge"
+          [attr.data-status]="selectedRequest.payment_status">
+
+          {{
+            getWorkflowLabel(
+              selectedRequest.workflow_status
+            )
+          }}
+
+        </span>
+
+      </section>
+
+
+      <!-- ===============================================
+           REQUEST SUMMARY
+      ================================================ -->
+
+      <section class="drawer-section">
+
+        <div class="drawer-section-head">
+
+          <span class="section-icon">
+
+            <lucide-icon
+              [img]="UserRound"
+              [size]="17">
+            </lucide-icon>
+
+          </span>
+
+
+          <div>
+
+            <h3>
+              بيانات العميل
+            </h3>
+
+            <p>
+              بيانات التواصل الأساسية
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="details-grid">
+
+          <div>
+
+            <span>
+              اسم العميل
+            </span>
+
+            <strong>
+              {{ selectedRequest.name || 'غير مسجل' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              رقم الهاتف
+            </span>
+
+            <strong>
+              {{ selectedRequest.phone || 'غير مسجل' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              الموظف المسؤول
+            </span>
+
+            <strong>
+              {{ assignedAgent?.full_name || 'غير محدد' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              المصدر
+            </span>
+
+            <strong>
+              {{ selectedRequest.source || 'غير محدد' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           BOOKING DETAILS
+      ================================================ -->
+
+      <section class="drawer-section">
+
+        <div class="drawer-section-head">
+
+          <span class="section-icon">
+
+            <lucide-icon
+              [img]="MapPin"
+              [size]="17">
+            </lucide-icon>
+
+          </span>
+
+
+          <div>
+
+            <h3>
+              تفاصيل الحجز
+            </h3>
+
+            <p>
+              البيانات التي تم إرسالها للحسابات
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="details-grid">
+
+          <div>
+
+            <span>
+              المكان
+            </span>
+
+            <strong>
+              {{ selectedRequest.place_name || 'غير محدد' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              المنطقة
+            </span>
+
+            <strong>
+              {{ selectedRequest.area || 'غير محددة' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              التاريخ
+            </span>
+
+            <strong>
+              {{
+                selectedRequest.date
+                  ? (selectedRequest.date | date:'dd/MM/yyyy')
+                  : 'غير محدد'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              الوقت
+            </span>
+
+            <strong>
+              {{ selectedRequest.time || 'غير محدد' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              عدد الأشخاص
+            </span>
+
+            <strong>
+              {{ selectedRequest.guests || 0 }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              الباقة
+            </span>
+
+            <strong>
+              {{ selectedRequest.package || 'غير محددة' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.extras"
+          class="full-detail-row">
+
+          <span>
+            الإضافات
+          </span>
+
+          <strong>
+            {{ selectedRequest.extras }}
+          </strong>
+
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.notes"
+          class="full-detail-row">
+
+          <span>
+            ملاحظات الطلب
+          </span>
+
+          <p>
+            {{ selectedRequest.notes }}
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           AMOUNT
+      ================================================ -->
+
+      <section class="amount-summary-card">
+
+        <div>
+
+          <span>
+            المبلغ المطلوب مراجعته
+          </span>
+
+
+          <strong
+            *ngIf="getRequestAmount(selectedRequest) as amount">
+
+            {{ amount | number }}
+
+            <small>
+              ج.م
+            </small>
+
+          </strong>
+
+
+          <strong
+            *ngIf="!getRequestAmount(selectedRequest)">
+
+            غير محدد
+
+          </strong>
+
+        </div>
+
+
+        <span class="amount-icon">
+
+          <lucide-icon
+            [img]="WalletCards"
+            [size]="25">
+          </lucide-icon>
+
+        </span>
+
+      </section>
+
+
+      <!-- ===============================================
+           PAYMENT RECEIPTS
+      ================================================ -->
+
+      <section class="drawer-section receipt-section">
+
+        <div class="drawer-section-head receipt-section-head">
+
+          <span class="section-icon receipt-icon">
+            <lucide-icon
+              [img]="ReceiptText"
+              [size]="17">
+            </lucide-icon>
+          </span>
+
+          <div class="receipt-section-title">
+            <h3>إيصال الدفع</h3>
+            <p>
+              راجعي الإيصال المرفوع قبل اتخاذ أي إجراء على الدفع.
+            </p>
+          </div>
+
+          <span
+            *ngIf="receipts.length > 0"
+            class="receipt-count">
+            {{ receipts.length }}
+          </span>
+
+        </div>
+
+
+        <div
+          *ngIf="receipts.length === 0"
+          class="receipt-empty">
+
+          <lucide-icon
+            [img]="ReceiptText"
+            [size]="22">
+          </lucide-icon>
+
+          <div>
+            <strong>لم يتم رفع إيصال بعد</strong>
+            <span>
+              لا تأكدي الدفع قبل وصول الإيصال ومراجعته.
+            </span>
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="receipts.length > 0"
+          class="receipts-list">
+
+          <article
+            *ngFor="
+              let receipt of receipts;
+              trackBy: trackByReceiptId
+            "
+            class="receipt-card">
+
+            <div class="receipt-preview">
+
+              <img
+                *ngIf="isImageReceipt(receipt) && receipt.signed_url"
+                [src]="receipt.signed_url"
+                [alt]="receipt.file_name || 'إيصال الدفع'">
+
+              <div
+                *ngIf="!isImageReceipt(receipt) || !receipt.signed_url"
+                class="receipt-file-placeholder">
+
+                <lucide-icon
+                  [img]="ReceiptText"
+                  [size]="28">
+                </lucide-icon>
+
+                <span>
+                  {{ isPdfReceipt(receipt) ? 'PDF' : 'ملف' }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="receipt-meta">
+
+              <div class="receipt-meta-head">
+
+                <div>
+                  <strong>
+                    {{ receipt.file_name || 'إيصال الدفع' }}
+                  </strong>
+
+                  <span>
+                    {{ receipt.uploaded_at | date:'dd/MM/yyyy - hh:mm a' }}
+                    <ng-container *ngIf="receipt.file_size">
+                      · {{ formatFileSize(receipt.file_size) }}
+                    </ng-container>
+                  </span>
+                </div>
+
+                <span
+                  class="receipt-status"
+                  [attr.data-status]="receipt.status">
+                  {{ getReceiptStatusLabel(receipt.status) }}
+                </span>
+
+              </div>
+
+
+              <p
+                *ngIf="receipt.review_notes"
+                class="receipt-review-note">
+                {{ receipt.review_notes }}
+              </p>
+
+
+              <a
+                *ngIf="receipt.signed_url"
+                class="receipt-open-link"
+                [href]="receipt.signed_url"
+                target="_blank"
+                rel="noopener noreferrer">
+                فتح الإيصال بالحجم الكامل
+              </a>
+
+              <span
+                *ngIf="!receipt.signed_url"
+                class="receipt-url-error">
+                تعذر تجهيز رابط عرض الإيصال.
+              </span>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           PAYMENT NOTES
+      ================================================ -->
+
+      <section class="drawer-section">
+
+        <div class="drawer-section-head">
+
+          <span class="section-icon">
+
+            <lucide-icon
+              [img]="MessageSquareText"
+              [size]="17">
+            </lucide-icon>
+
+          </span>
+
+
+          <div>
+
+            <h3>
+              ملاحظات الحسابات
+            </h3>
+
+            <p>
+              اكتبي أي تفاصيل تخص الدفع أو ما يحتاجه موظف خدمة العملاء.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <textarea
+          [(ngModel)]="paymentNotes"
+          rows="5"
+          placeholder="مثال: تم استلام التحويل / المبلغ غير مطابق / نحتاج صورة الإيصال...">
+        </textarea>
+
+
+        <button
+          type="button"
+          class="save-note-button"
+          [disabled]="saving"
+          (click)="savePaymentNotes()">
+
+          حفظ الملاحظات
+
+        </button>
+
+      </section>
+
+
+      <!-- ===============================================
+           ERROR
+      ================================================ -->
+
+      <div
+        *ngIf="actionError"
+        class="action-error">
+
+        {{ actionError }}
+
+      </div>
+
+
+      <!-- ===============================================
+           ACTIONS
+      ================================================ -->
+
+      <section class="payment-decision-card">
+
+        <div class="decision-head">
+          <div>
+            <span class="decision-kicker">الإجراء التالي</span>
+            <strong>
+              <ng-container *ngIf="selectedRequest.payment_status === 'pending'">
+                ابدئي مراجعة الإيصال
+              </ng-container>
+              <ng-container *ngIf="selectedRequest.payment_status === 'under_review'">
+                اتخذي قرار المراجعة
+              </ng-container>
+              <ng-container *ngIf="selectedRequest.payment_status === 'paid'">
+                تمت مراجعة الدفع واعتماده
+              </ng-container>
+              <ng-container *ngIf="selectedRequest.payment_status === 'failed'">
+                الإيصال يحتاج متابعة جديدة من العميل
+              </ng-container>
+              <ng-container *ngIf="selectedRequest.payment_status === 'refunded'">
+                تم استرداد المبلغ
+              </ng-container>
+            </strong>
+          </div>
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.payment_status === 'pending'"
+          class="single-payment-action">
+
+          <button
+            type="button"
+            class="review-button"
+            [disabled]="saving || receipts.length === 0"
+            (click)="startReview()">
+
+            <lucide-icon
+              [img]="RefreshCw"
+              [size]="17">
+            </lucide-icon>
+
+            بدء مراجعة الإيصال
+          </button>
+
+          <p *ngIf="receipts.length === 0" class="action-hint warning">
+            لا يمكن بدء المراجعة قبل رفع العميل للإيصال.
+          </p>
+
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.payment_status === 'under_review'"
+          class="payment-actions">
+
+          <button
+            type="button"
+            class="paid-button"
+            [disabled]="saving || receipts.length === 0"
+            (click)="confirmPayment()">
+
+            <lucide-icon
+              [img]="CheckCircle2"
+              [size]="17">
+            </lucide-icon>
+
+            الإيصال صحيح — تأكيد الدفع
+          </button>
+
+
+          <button
+            type="button"
+            class="agent-action-button"
+            [disabled]="saving"
+            (click)="requestAgentAction()">
+
+            <lucide-icon
+              [img]="UserRound"
+              [size]="17">
+            </lucide-icon>
+
+            مطلوب تواصل مع العميل
+          </button>
+
+
+          <button
+            type="button"
+            class="failed-button"
+            [disabled]="saving"
+            (click)="failPayment()">
+
+            <lucide-icon
+              [img]="CircleX"
+              [size]="17">
+            </lucide-icon>
+
+            الإيصال غير صالح / الدفع غير مطابق
+          </button>
+
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.payment_status === 'paid'"
+          class="decision-result success">
+          <lucide-icon
+            [img]="CheckCircle2"
+            [size]="18">
+          </lucide-icon>
+          <span>
+            تم اعتماد الدفع. الطلب جاهز للعودة إلى مسار تأكيد المكان.
+          </span>
+        </div>
+
+
+        <div
+          *ngIf="selectedRequest.payment_status === 'failed'"
+          class="decision-result danger">
+          <lucide-icon
+            [img]="CircleX"
+            [size]="18">
+          </lucide-icon>
+          <span>
+            سجلي السبب في الملاحظات واطلبي من خدمة العملاء متابعة العميل أو رفع إيصال جديد.
+          </span>
+        </div>
+
+      </section>
+
+
+      <!-- ===============================================
+           HISTORY
+      ================================================ -->
+
+      <section class="drawer-section">
+
+        <div class="drawer-section-head">
+
+          <span class="section-icon">
+
+            <lucide-icon
+              [img]="Clock3"
+              [size]="17">
+            </lucide-icon>
+
+          </span>
+
+
+          <div>
+
+            <h3>
+              سجل الطلب
+            </h3>
+
+            <p>
+              آخر الملاحظات والأحداث المسجلة
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          *ngIf="
+            notes.length === 0
+            &&
+            events.length === 0
+          "
+          class="history-empty">
+
+          لا يوجد سجل بعد.
+
+        </div>
+
+
+        <!-- NOTES -->
+
+        <div
+          *ngIf="notes.length > 0"
+          class="history-group">
+
+          <span class="history-title">
+            الملاحظات
+          </span>
+
+
+          <article
+            *ngFor="
+              let note of notes;
+              trackBy: trackByNoteId
+            "
+            class="history-item">
+
+            <div class="history-dot"></div>
+
+
+            <div>
+
+              <strong>
+                {{ note.note_type || 'ملاحظة' }}
+              </strong>
+
+              <p>
+                {{ note.content }}
+              </p>
+
+              <small>
+                {{
+                  note.created_at
+                    | date:'dd/MM/yyyy - hh:mm a'
+                }}
+              </small>
+
+            </div>
+
+          </article>
+
+        </div>
+
+
+        <!-- EVENTS -->
+
+        <div
+          *ngIf="events.length > 0"
+          class="history-group">
+
+          <span class="history-title">
+            الأحداث
+          </span>
+
+
+          <article
+            *ngFor="
+              let event of events;
+              trackBy: trackByEventId
+            "
+            class="history-item event">
+
+            <div class="history-dot"></div>
+
+
+            <div>
+
+              <strong>
+                {{ event.event_type }}
+              </strong>
+
+              <small>
+                {{
+                  event.created_at
+                    | date:'dd/MM/yyyy - hh:mm a'
+                }}
+              </small>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </aside>
+
+</div>

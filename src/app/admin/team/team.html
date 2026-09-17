@@ -1,0 +1,929 @@
+<div class="team-page" dir="rtl">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="team-header">
+
+    <div class="header-copy">
+
+      <span class="header-label">
+        إدارة الفريق
+      </span>
+
+      <h1>
+        فريق العمل
+      </h1>
+
+      <p>
+        إدارة المستخدمين، الأدوار، حالة الحسابات وحدود استقبال الطلبات.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="add-button"
+      (click)="openCreate()">
+
+      <span class="add-icon">
+        +
+      </span>
+
+      <span>
+        إضافة مستخدم
+      </span>
+
+    </button>
+
+  </section>
+
+
+  <!-- =====================================================
+       KPI SUMMARY
+  ====================================================== -->
+
+  <section class="team-stats">
+
+    <article class="team-stat">
+
+      <span>
+        إجمالي المستخدمين
+      </span>
+
+      <strong>
+        {{ totalUsers }}
+      </strong>
+
+      <small>
+        جميع حسابات الفريق
+      </small>
+
+    </article>
+
+
+    <article class="team-stat">
+
+      <span>
+        حسابات نشطة
+      </span>
+
+      <strong>
+        {{ activeUsers }}
+      </strong>
+
+      <small>
+        متاحة للعمل حاليًا
+      </small>
+
+    </article>
+
+
+    <article class="team-stat">
+
+      <span>
+        موظفو خدمة العملاء
+      </span>
+
+      <strong>
+        {{ agentsCount }}
+      </strong>
+
+      <small>
+        المسؤولون عن متابعة الطلبات
+      </small>
+
+    </article>
+
+
+    <article class="team-stat">
+
+      <span>
+        المديرون
+      </span>
+
+      <strong>
+        {{ managersCount }}
+      </strong>
+
+      <small>
+        متابعة التشغيل والفريق
+      </small>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       SEARCH
+  ====================================================== -->
+
+  <section class="team-search-card">
+
+    <div class="search-area">
+
+      <div class="search-icon">
+        ⌕
+      </div>
+
+      <input
+        type="text"
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="البحث بالاسم، البريد الإلكتروني أو رقم الهاتف">
+
+      <div class="search-count">
+
+        <strong>
+          {{ filteredUsers.length }}
+        </strong>
+
+        <span>
+          نتيجة
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       FILTERS
+  ====================================================== -->
+
+  <section class="team-filters">
+
+    <div class="role-filters">
+
+      <button
+        type="button"
+        class="filter-button"
+        [class.active]="roleFilter === 'all'"
+        (click)="setRoleFilter('all')">
+
+        <span>
+          جميع الأدوار
+        </span>
+
+        <strong>
+          {{ getRoleCount('all') }}
+        </strong>
+
+      </button>
+
+
+      <button
+        *ngFor="let role of roles"
+        type="button"
+        class="filter-button"
+        [class.active]="roleFilter === role.value"
+        (click)="setRoleFilter(role.value)">
+
+        <span>
+          {{ role.label }}
+        </span>
+
+        <strong>
+          {{ getRoleCount(role.value) }}
+        </strong>
+
+      </button>
+
+    </div>
+
+
+    <div class="status-filters">
+
+      <button
+        type="button"
+        [class.active]="statusFilter === 'all'"
+        (click)="setStatusFilter('all')">
+
+        الكل
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="statusFilter === 'active'"
+        (click)="setStatusFilter('active')">
+
+        نشط
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="statusFilter === 'inactive'"
+        (click)="setStatusFilter('inactive')">
+
+        غير نشط
+
+      </button>
+
+
+      <button
+        *ngIf="
+          roleFilter !== 'all' ||
+          statusFilter !== 'all' ||
+          searchTerm
+        "
+        type="button"
+        class="reset-button"
+        (click)="clearFilters()">
+
+        إعادة ضبط
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل بيانات فريق العمل...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       TEAM TABLE
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="team-card">
+
+    <div class="table-head">
+
+      <div>
+
+        <span class="section-label">
+          المستخدمون
+        </span>
+
+        <h2>
+          حسابات فريق العمل
+        </h2>
+
+        <p>
+          {{ filteredUsers.length }}
+          مستخدم مطابق لمعايير البحث الحالية
+        </p>
+
+      </div>
+
+
+      <div
+        *ngIf="filteredUsers.length > 0"
+        class="result-range">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        -
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredUsers.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- EMPTY -->
+    <div
+      *ngIf="filteredUsers.length === 0"
+      class="empty-state">
+
+      <div class="empty-icon">
+        👤
+      </div>
+
+      <strong>
+        لا يوجد مستخدمون مطابقون
+      </strong>
+
+      <p>
+        جربي تعديل البحث أو إعادة ضبط التصفية.
+      </p>
+
+      <button
+        type="button"
+        (click)="clearFilters()">
+
+        عرض كل المستخدمين
+
+      </button>
+
+    </div>
+
+
+    <!-- TABLE -->
+    <div
+      *ngIf="filteredUsers.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              المستخدم
+            </th>
+
+            <th>
+              الدور
+            </th>
+
+            <th>
+              رقم الهاتف
+            </th>
+
+            <th>
+              الحد الأقصى للطلبات
+            </th>
+
+            <th>
+              الحالة
+            </th>
+
+            <th class="action-column">
+              الإجراءات
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let user of paginatedUsers;
+              trackBy: trackByUserId
+            ">
+
+            <!-- USER -->
+            <td>
+
+              <div class="user-cell">
+
+                <div class="user-avatar">
+
+                  {{
+                    (user.full_name || '?')
+                      .charAt(0)
+                  }}
+
+                </div>
+
+
+                <div>
+
+                  <strong>
+                    {{ user.full_name }}
+                  </strong>
+
+                  <small>
+                    {{ user.email }}
+                  </small>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- ROLE -->
+            <td>
+
+              <div class="role-cell">
+
+                <span
+                  class="role-badge"
+                  [attr.data-role]="user.role">
+
+                  {{ getRoleLabel(user.role) }}
+
+                </span>
+
+                <small>
+                  {{ getRoleDescription(user.role) }}
+                </small>
+
+              </div>
+
+            </td>
+
+
+            <!-- PHONE -->
+            <td class="phone-cell">
+
+              {{
+                user.phone ||
+                'غير مسجل'
+              }}
+
+            </td>
+
+
+            <!-- LIMIT -->
+            <td>
+
+              <span class="capacity-value">
+
+                {{ user.max_active_requests }}
+
+              </span>
+
+            </td>
+
+
+            <!-- STATUS -->
+            <td>
+
+              <span
+                class="user-status"
+                [class.inactive]="!user.active">
+
+                <span class="status-dot"></span>
+
+                {{
+                  user.active
+                    ? 'نشط'
+                    : 'غير نشط'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- ACTION -->
+            <td class="action-column">
+
+              <button
+                type="button"
+                class="edit-button"
+                (click)="openEdit(user)">
+
+                تعديل
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+    ====================================================== -->
+
+    <div
+      *ngIf="filteredUsers.length > 0"
+      class="pagination">
+
+      <div class="pagination-info">
+
+        عرض
+
+        <strong>
+          {{ pageStart }}
+        </strong>
+
+        إلى
+
+        <strong>
+          {{ pageEnd }}
+        </strong>
+
+        من
+
+        <strong>
+          {{ filteredUsers.length }}
+        </strong>
+
+        مستخدم
+
+      </div>
+
+
+      <div class="pagination-controls">
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="currentPage === 1"
+          (click)="previousPage()">
+
+          السابق
+
+        </button>
+
+
+        <div class="page-number">
+
+          <span>
+            الصفحة
+          </span>
+
+          <strong>
+            {{ currentPage }}
+          </strong>
+
+          <span>
+            من {{ totalPages }}
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="page-button"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+
+          التالي
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ADD / EDIT DRAWER
+  ====================================================== -->
+
+  <div
+    *ngIf="drawerOpen"
+    class="team-overlay"
+    (click)="closeDrawer()">
+
+    <aside
+      class="team-panel"
+      (click)="$event.stopPropagation()">
+
+      <!-- PANEL HEADER -->
+      <header class="panel-header">
+
+        <div>
+
+          <span class="panel-label">
+
+            {{
+              editingUser
+                ? 'تعديل المستخدم'
+                : 'مستخدم جديد'
+            }}
+
+          </span>
+
+          <h2>
+
+            {{
+              editingUser
+                ? 'تعديل بيانات المستخدم'
+                : 'إضافة مستخدم جديد'
+            }}
+
+          </h2>
+
+          <p>
+            إدارة بيانات الحساب والدور وحدود التشغيل.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="panel-close"
+          [disabled]="saving"
+          (click)="closeDrawer()">
+
+          ✕
+
+        </button>
+
+      </header>
+
+
+      <!-- PANEL BODY -->
+      <div class="panel-body">
+
+        <div
+          *ngIf="saveError"
+          class="form-error">
+
+          {{ saveError }}
+
+        </div>
+
+
+        <!-- BASIC INFO -->
+        <section class="form-section">
+
+          <div class="form-section-title">
+
+            <span class="section-number">
+              01
+            </span>
+
+            <div>
+
+              <strong>
+                بيانات المستخدم
+              </strong>
+
+              <small>
+                بيانات التواصل الأساسية
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              الاسم الكامل
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="form.full_name"
+              placeholder="اسم المستخدم">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              البريد الإلكتروني
+            </label>
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              placeholder="name@tasahel.com">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              رقم الهاتف
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="form.phone"
+              placeholder="01xxxxxxxxx">
+
+          </div>
+
+        </section>
+
+
+        <!-- ROLE -->
+        <section class="form-section">
+
+          <div class="form-section-title">
+
+            <span class="section-number">
+              02
+            </span>
+
+            <div>
+
+              <strong>
+                الدور والصلاحيات
+              </strong>
+
+              <small>
+                تحديد وظيفة المستخدم داخل النظام
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              الدور
+            </label>
+
+            <select
+              [(ngModel)]="form.role">
+
+              <option
+                *ngFor="let role of roles"
+                [ngValue]="role.value">
+
+                {{ role.label }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="role-preview">
+
+            <span>
+              صلاحيات الدور
+            </span>
+
+            <strong>
+              {{ getRoleLabel(form.role) }}
+            </strong>
+
+            <p>
+              {{ getRoleDescription(form.role) }}
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- CAPACITY -->
+        <section class="form-section">
+
+          <div class="form-section-title">
+
+            <span class="section-number">
+              03
+            </span>
+
+            <div>
+
+              <strong>
+                إعدادات التشغيل
+              </strong>
+
+              <small>
+                إعدادات توزيع الطلبات
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label>
+              الحد الأقصى للطلبات النشطة
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="form.max_active_requests">
+
+            <small>
+              يستخدم لاحقًا في نظام توزيع الطلبات تلقائيًا.
+            </small>
+
+          </div>
+
+
+          <div class="account-toggle">
+
+            <div>
+
+              <strong>
+                حالة الحساب
+              </strong>
+
+              <span>
+
+                {{
+                  form.active
+                    ? 'الحساب نشط ومتاح للعمل'
+                    : 'الحساب متوقف عن استقبال المهام'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <label class="switch">
+
+              <input
+                type="checkbox"
+                [(ngModel)]="form.active">
+
+              <span class="switch-slider"></span>
+
+            </label>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- PANEL FOOTER -->
+      <footer class="panel-footer">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeDrawer()">
+
+          إلغاء
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="saveUser()">
+
+          {{
+            saving
+              ? 'جاري الحفظ...'
+              : (
+                  editingUser
+                    ? 'حفظ التعديلات'
+                    : 'إضافة المستخدم'
+                )
+          }}
+
+        </button>
+
+      </footer>
+
+    </aside>
+
+  </div>
+
+</div>

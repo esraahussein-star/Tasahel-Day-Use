@@ -1,0 +1,373 @@
+<div
+  class="account-dashboard"
+  dir="rtl">
+
+  <section class="dashboard-header">
+    <div>
+      <span class="dashboard-label">
+        ACCOUNTS
+      </span>
+
+      <h1>
+        Accounts Dashboard
+      </h1>
+
+      <p>
+        ملخص المبيعات والتحصيل والربح والطلبات الجديدة.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="loading || reportLoading"
+      (click)="loadDashboard(false)">
+
+      <lucide-icon
+        [img]="RefreshCw"
+        [size]="17">
+      </lucide-icon>
+
+      Refresh
+    </button>
+  </section>
+
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+    Loading dashboard...
+  </div>
+
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+    {{ errorMessage }}
+  </div>
+
+
+  <ng-container
+    *ngIf="!loading && !errorMessage">
+
+    <!-- DATE FILTER -->
+    <section class="report-filter-card">
+
+      <div class="filter-title">
+        <span class="filter-icon">
+          <lucide-icon
+            [img]="CalendarDays"
+            [size]="18">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <strong>Date Range</strong>
+          <span>حدد الفترة الزمنية لعرض ومراجعة البيانات المالية. </span>
+        </div>
+      </div>
+
+     
+
+      <div class="custom-range">
+        <label>
+          <span>From</span>
+          <input
+            type="date"
+            [(ngModel)]="dateFrom"
+            (change)="activePreset = 'custom'">
+        </label>
+
+        <label>
+          <span>To</span>
+          <input
+            type="date"
+            [(ngModel)]="dateTo"
+            (change)="activePreset = 'custom'">
+        </label>
+
+        <button
+          type="button"
+          class="apply-range-button"
+          [disabled]="reportLoading || !dateFrom || !dateTo"
+          (click)="applyCustomRange()">
+          Apply
+        </button>
+      </div>
+
+    </section>
+
+
+    <!-- FINANCIAL KPIS -->
+    <section class="financial-grid">
+
+      <article class="financial-card sales">
+        <span class="financial-icon">
+          <lucide-icon
+            [img]="TrendingUp"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Total Sales</span>
+          <strong>
+            {{ totalSales | number:'1.0-2' }}
+            <small>EGP</small>
+          </strong>
+          <small>{{ paidRequests }} Sales</small>
+        </div>
+      </article>
+
+
+      <article class="financial-card cost">
+        <span class="financial-icon">
+          <lucide-icon
+            [img]="Landmark"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Total Cost</span>
+          <strong>
+            {{ totalCost | number:'1.0-2' }}
+            <small>EGP</small>
+          </strong>
+          <small>تكلفة الأماكن</small>
+        </div>
+      </article>
+
+
+      <article class="financial-card profit">
+        <span class="financial-icon">
+          <lucide-icon
+            [img]="BadgeDollarSign"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Gross Profit</span>
+          <strong>
+            {{ grossProfit | number:'1.0-2' }}
+            <small>EGP</small>
+          </strong>
+          <small>Sales - Cost</small>
+        </div>
+      </article>
+
+
+      <article class="financial-card refund">
+        <span class="financial-icon">
+          <lucide-icon
+            [img]="RotateCcw"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Refunded</span>
+          <strong>
+            {{ refunded | number:'1.0-2' }}
+            <small>EGP</small>
+          </strong>
+          <small>{{ refundedRequests }} refunds</small>
+        </div>
+      </article>
+
+    </section>
+
+
+    <section class="collection-strip">
+      <div>
+        <span>Collected</span>
+        <strong>
+          {{ collected | number:'1.0-2' }} EGP
+        </strong>
+      </div>
+
+      <div class="net">
+        <span>Net Collected</span>
+        <strong>
+          {{ netCollected | number:'1.0-2' }} EGP
+        </strong>
+      </div>
+    </section>
+
+
+    <!-- PAYMENT STATUS -->
+    <section class="stats-grid">
+
+      <button
+        type="button"
+        class="stat-card pending"
+        (click)="openRequests('pending')">
+
+        <span class="stat-icon">
+          <lucide-icon
+            [img]="WalletCards"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>New Requests</span>
+          <strong>{{ pendingCount }}</strong>
+          <small>Waiting for review</small>
+        </div>
+      </button>
+
+
+      <button
+        type="button"
+        class="stat-card review"
+        (click)="openRequests('under_review')">
+
+        <span class="stat-icon">
+          <lucide-icon
+            [img]="Clock3"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Under Review</span>
+          <strong>{{ reviewCount }}</strong>
+          <small>Payment review</small>
+        </div>
+      </button>
+
+
+
+
+
+      <button
+        type="button"
+        class="stat-card failed"
+        (click)="openRequests('failed')">
+
+        <span class="stat-icon">
+          <lucide-icon
+            [img]="CircleX"
+            [size]="20">
+          </lucide-icon>
+        </span>
+
+        <div>
+          <span>Failed</span>
+          <strong>{{ failedCount }}</strong>
+          <small>Needs attention</small>
+        </div>
+      </button>
+
+    </section>
+
+
+    <!-- NEW REQUESTS -->
+    <section class="recent-card">
+
+      <div class="section-head">
+        <div>
+          <span class="section-label">
+            NEW
+          </span>
+
+          <h2>
+            New Payment Requests
+          </h2>
+
+          <p>
+            أحدث الطلبات التي وصلت للحسابات وتنتظر المراجعة.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="view-all-button"
+          (click)="openRequests('pending')">
+
+          View All
+
+          <lucide-icon
+            [img]="ArrowLeft"
+            [size]="16">
+          </lucide-icon>
+        </button>
+      </div>
+
+
+      <div
+        *ngIf="recentRequests.length === 0"
+        class="empty-state">
+        No new payment requests.
+      </div>
+
+
+      <div
+        *ngIf="recentRequests.length > 0"
+        class="recent-list">
+
+        <button
+          *ngFor="
+            let request of recentRequests;
+            trackBy: trackByRequestId
+          "
+          type="button"
+          class="recent-row"
+          (click)="openRequests(request.payment_status)">
+
+          <div class="customer-block">
+            <div class="customer-avatar">
+              {{ (request.name || '?').charAt(0) }}
+            </div>
+
+            <div>
+              <strong>
+                {{ request.name || 'Unknown Customer' }}
+              </strong>
+
+              <span>
+                {{ request.tracking_code || request.phone || '-' }}
+              </span>
+            </div>
+          </div>
+
+
+          <div class="row-data">
+            <span>Place</span>
+            <strong>
+              {{ request.place_name || '-' }}
+            </strong>
+          </div>
+
+
+          <div class="amount-block">
+            <span>Amount</span>
+
+            <strong
+              *ngIf="getRequestAmount(request) as amount">
+              {{ amount | number:'1.0-2' }}
+              <small>EGP</small>
+            </strong>
+
+            <strong
+              *ngIf="!getRequestAmount(request)">
+              -
+            </strong>
+          </div>
+
+
+          <span
+            class="payment-status"
+            [attr.data-status]="request.payment_status">
+            {{ getPaymentStatusLabel(request.payment_status) }}
+          </span>
+
+        </button>
+      </div>
+
+    </section>
+
+  </ng-container>
+</div>

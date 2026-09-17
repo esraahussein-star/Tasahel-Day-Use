@@ -1,0 +1,366 @@
+<div class="manager-dashboard" dir="rtl">
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <section class="manager-header">
+
+    <div class="header-copy">
+
+      <span class="header-label">
+        لوحة المدير
+      </span>
+
+      <h1>
+        متابعة فريق التشغيل
+      </h1>
+
+      <p>
+        متابعة أداء الموظفين، توزيع الحمل، الطلبات النشطة وحالة التنفيذ.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       OVERVIEW
+  ====================================================== -->
+
+  <section class="manager-stats">
+
+    <article class="manager-stat">
+
+      <span>
+        إجمالي الموظفين
+      </span>
+
+      <strong>
+        {{ totalAgents }}
+      </strong>
+
+      <small>
+        موظفو خدمة العملاء
+      </small>
+
+    </article>
+
+
+    <article class="manager-stat">
+
+      <span>
+        الموظفون النشطون
+      </span>
+
+      <strong>
+        {{ activeAgents }}
+      </strong>
+
+      <small>
+        متاحون للعمل حاليًا
+      </small>
+
+    </article>
+
+
+    <article class="manager-stat">
+
+      <span>
+        الطلبات النشطة
+      </span>
+
+      <strong>
+        {{ totalActiveAssignments }}
+      </strong>
+
+      <small>
+        جديدة أو قيد المتابعة
+      </small>
+
+    </article>
+
+
+    <article class="manager-stat warning">
+
+      <span>
+        طلبات غير مسندة
+      </span>
+
+      <strong>
+        {{ unassignedRequests }}
+      </strong>
+
+      <small>
+        تحتاج إلى توزيع
+      </small>
+
+    </article>
+
+
+    <article class="manager-stat">
+
+      <span>
+        طلبات مكتملة
+      </span>
+
+      <strong>
+        {{ totalCompletedAssignments }}
+      </strong>
+
+      <small>
+        تم إنهاؤها
+      </small>
+
+    </article>
+
+  </section>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل بيانات الفريق...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       AGENTS
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="agents-section">
+
+    <div class="section-head">
+
+      <div>
+
+        <span class="section-label">
+          فريق العمل
+        </span>
+
+        <h2>
+          حالة الموظفين
+        </h2>
+
+        <p>
+          متابعة الحمل التشغيلي الحالي لكل موظف.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="agents.length === 0"
+      class="empty-state">
+
+      <div class="empty-icon">
+        👥
+      </div>
+
+      <strong>
+        لا يوجد موظفون
+      </strong>
+
+      <p>
+        لا يوجد Agents مسجلون في النظام حاليًا.
+      </p>
+
+    </div>
+
+
+    <div
+      *ngIf="agents.length > 0"
+      class="agents-grid">
+
+      <article
+        *ngFor="
+          let agent of agents;
+          trackBy: trackByAgentId
+        "
+        class="agent-card"
+        [class.inactive]="!agent.active"
+        [class.full]="
+          getAgentCapacity(agent) > 0 &&
+          getAgentActiveCount(agent.id) >=
+          getAgentCapacity(agent)
+        ">
+
+        <!-- TOP -->
+        <div class="agent-card-top">
+
+          <div class="agent-info">
+
+            <div class="agent-avatar">
+
+              {{
+                (agent.full_name || '?')
+                  .charAt(0)
+              }}
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                {{ agent.full_name }}
+              </strong>
+
+              <span>
+                {{ agent.email }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <span
+            class="agent-status"
+            [class.inactive]="!agent.active"
+            [class.full]="
+              getAgentCapacity(agent) > 0 &&
+              getAgentActiveCount(agent.id) >=
+              getAgentCapacity(agent)
+            ">
+
+            {{ getAgentStatusLabel(agent) }}
+
+          </span>
+
+        </div>
+
+
+        <!-- WORKLOAD -->
+        <div class="agent-workload">
+
+          <div class="workload-head">
+
+            <span>
+              الحمل التشغيلي
+            </span>
+
+            <strong>
+
+              {{ getAgentActiveCount(agent.id) }}
+              /
+              {{ getAgentCapacity(agent) }}
+
+            </strong>
+
+          </div>
+
+
+          <div class="workload-track">
+
+            <div
+              class="workload-bar"
+              [style.width.%]="getAgentLoadPercent(agent)">
+            </div>
+
+          </div>
+
+
+          <div class="workload-footer">
+
+            <span>
+              {{ getAgentLoadPercent(agent) }}%
+            </span>
+
+            <span>
+              متبقي {{ getAgentRemaining(agent) }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- REQUEST STATS -->
+        <div class="agent-request-stats">
+
+          <div>
+
+            <span>
+              جديد
+            </span>
+
+            <strong>
+              {{ getAgentAssignedCount(agent.id) }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              قيد المتابعة
+            </span>
+
+            <strong>
+              {{ getAgentInProgressCount(agent.id) }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              مكتمل
+            </span>
+
+            <strong>
+              {{ getAgentCompletedCount(agent.id) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <div class="agent-card-footer">
+
+          <span>
+            الحد الأقصى للطلبات
+          </span>
+
+          <strong>
+            {{ getAgentCapacity(agent) }}
+          </strong>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</div>

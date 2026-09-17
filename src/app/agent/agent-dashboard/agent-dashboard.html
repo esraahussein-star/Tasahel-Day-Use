@@ -1,0 +1,1369 @@
+<div
+  class="agent-workspace"
+  dir="rtl">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <section class="workspace-header redesigned-header">
+
+    <div class="workspace-title">
+      <span class="eyebrow">مساحة العمل</span>
+      <h1>أهلاً {{ currentUser?.full_name }}</h1>
+      <p>ركّزي على الطلبات التي تحتاج تدخلك الآن، والباقي سيظل متاحًا للمتابعة بدون أن يستهلك من سعتك.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-workspace-button"
+      [disabled]="loading"
+      (click)="loadWorkspace()">
+      تحديث
+    </button>
+
+  </section>
+
+  <!-- =====================================================
+       SUMMARY
+  ====================================================== -->
+
+  <section class="workspace-summary-grid">
+
+    <article class="summary-card capacity-summary">
+      <span>السعة الحالية</span>
+      <div class="summary-main">
+        <strong>{{ activeCount }}</strong>
+        <small>/ {{ maxCapacity }}</small>
+      </div>
+      <p>{{ remainingCapacity }} أماكن متاحة لطلبات جديدة</p>
+      <div class="capacity-progress">
+        <span
+          [style.width.%]="maxCapacity ? (activeCount / maxCapacity) * 100 : 0">
+        </span>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <span>تحتاج إجراء الآن</span>
+      <strong>{{ needsActionCount }}</strong>
+      <p>جديد أو قيد التواصل</p>
+    </article>
+
+    <article class="summary-card">
+      <span>في انتظار العميل</span>
+      <strong>{{ waitingCustomerCount }}</strong>
+      <p>رد عميل أو إيصال دفع</p>
+    </article>
+
+    <article class="summary-card muted-summary">
+      <span>خارج السعة</span>
+      <strong>{{ outsideCapacityCount }}</strong>
+      <p>متابعات وحسابات ومكان</p>
+    </article>
+
+  </section>
+
+  <!-- =====================================================
+       WORK QUEUES
+  ====================================================== -->
+
+  <section class="workspace-tabs redesigned-tabs">
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'current'"
+      (click)="setTab('current')">
+      <span>شغلي الحالي</span>
+      <strong>{{ currentWorkRows.length }}</strong>
+      <small>يُحسب من السعة</small>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'follow_up'"
+      (click)="setTab('follow_up')">
+      <span>المتابعات</span>
+      <strong>{{ followUpRows.length }}</strong>
+      <small>لا يُحسب من السعة</small>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'handoff'"
+      (click)="setTab('handoff')">
+      <span>بعد التسليم</span>
+      <strong>{{ handoffRows.length }}</strong>
+      <small>حسابات / دفع / مكان</small>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'closed'"
+      (click)="setTab('closed')">
+      <span>المنتهية</span>
+      <strong>{{ closedRows.length }}</strong>
+      <small>أرشيف الطلبات</small>
+    </button>
+
+  </section>
+
+  <!-- =====================================================
+       LOADING / ERROR
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="page-state">
+
+    جاري تحميل طلباتك...
+
+  </div>
+
+
+  <div
+    *ngIf="!loading && errorMessage"
+    class="page-state error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       REQUESTS LIST
+  ====================================================== -->
+
+  <section
+    *ngIf="!loading && !errorMessage"
+    class="work-card">
+
+    <header class="work-card-head redesigned-work-head">
+
+      <div>
+        <span>قائمة العمل</span>
+        <h2>{{ getTabTitle() }}</h2>
+        <p>{{ getTabDescription() }}</p>
+      </div>
+
+      <div class="work-head-count">
+        <strong>{{ visibleRows.length }}</strong>
+        <span>طلب</span>
+      </div>
+
+    </header>
+
+
+    <!-- EMPTY -->
+
+    <div
+      *ngIf="visibleRows.length === 0"
+      class="empty-state">
+
+      <div>
+        ✓
+      </div>
+
+      <strong>
+        لا توجد طلبات هنا حاليًا
+      </strong>
+
+      <p>
+        أي طلب يحتاج تدخلك سيظهر هنا.
+      </p>
+
+    </div>
+
+
+    <!-- LIST -->
+
+    <div
+      *ngIf="visibleRows.length > 0"
+      class="request-list">
+
+      <article
+        *ngFor="
+          let row of visibleRows;
+          trackBy: trackByRequestId
+        "
+        class="request-card"
+        [class.followup-due]="isFollowUpDue(row)">
+
+        <!-- CUSTOMER -->
+
+        <div class="request-person">
+
+          <div class="avatar">
+
+            {{
+              (row.name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              {{ row.name || 'عميل غير مسجل' }}
+            </strong>
+
+            <span>
+              {{ row.phone || 'بدون رقم هاتف' }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- PLACE -->
+
+        <div class="request-place">
+
+          <span>
+            المكان
+          </span>
+
+          <strong>
+            {{ row.place_name || 'غير محدد' }}
+          </strong>
+
+        </div>
+
+
+        <!-- BOOKING DATE -->
+
+        <div class="request-booking">
+
+          <span>
+            موعد الحجز
+          </span>
+
+          <strong>
+            {{
+              row.date
+                ? (row.date | date:'dd/MM/yyyy')
+                : 'غير محدد'
+            }}
+          </strong>
+
+          <small>
+            {{ row.time || '' }}
+          </small>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="request-state">
+
+          <span
+            class="capacity-marker"
+            [class.counted]="isCountedInCapacity(row)">
+            {{ isCountedInCapacity(row) ? 'داخل السعة' : 'خارج السعة' }}
+          </span>
+
+          <span
+            class="status-pill"
+            [attr.data-status]="row.workflow_status">
+
+            {{
+              getWorkflowLabel(
+                row.workflow_status || 'new'
+              )
+            }}
+
+          </span>
+
+
+          <small
+            *ngIf="row.next_follow_up_at"
+            [class.due]="isFollowUpDue(row)">
+
+            متابعة:
+            {{
+              row.next_follow_up_at
+                | date:'dd/MM - hh:mm a'
+            }}
+
+          </small>
+
+        </div>
+
+
+        <!-- OPEN -->
+<!-- 
+        <button
+          type="button"
+          class="open-button"
+          (click)="openRequest(row)">
+
+          <span>فتح</span>
+          <span aria-hidden="true">←</span>
+
+        </button> -->
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       DRAWER
+  ====================================================== -->
+
+  <div
+    *ngIf="selectedRequest"
+    class="drawer-overlay"
+    (click)="closeRequest()">
+
+    <aside
+      class="request-drawer"
+      (click)="$event.stopPropagation()">
+
+      <!-- =================================================
+           DRAWER HEADER
+      ================================================== -->
+
+      <header class="drawer-header">
+
+        <div class="drawer-customer">
+
+          <div class="drawer-avatar">
+
+            {{
+              (editForm.name || '?')
+                .charAt(0)
+            }}
+
+          </div>
+
+
+          <div>
+
+            <span>
+              ملف الطلب
+            </span>
+
+            <h2>
+              {{ editForm.name || 'عميل غير مسجل' }}
+            </h2>
+
+            <p>
+              {{ editForm.phone || 'بدون رقم هاتف' }}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          [disabled]="saving || noteSaving"
+          (click)="closeRequest()">
+
+          ×
+
+        </button>
+
+      </header>
+
+
+      <!-- =================================================
+           DRAWER BODY
+      ================================================== -->
+
+      <div class="drawer-body">
+
+        <!-- ===============================================
+             CURRENT STATUS
+        ================================================ -->
+
+        <section class="request-overview">
+
+          <div class="overview-status">
+
+            <span>
+              حالة الطلب
+            </span>
+
+            <strong>
+              {{
+                getWorkflowLabel(
+                  editForm.workflow_status
+                )
+              }}
+            </strong>
+
+          </div>
+
+
+          <div
+            *ngIf="
+              editForm.workflow_status === 'sent_to_accounts'
+              ||
+              editForm.workflow_status === 'payment_review'
+            "
+            class="account-status">
+
+            <span class="account-status-dot"></span>
+
+            <div>
+
+              <strong>
+                الطلب لدى الحسابات
+              </strong>
+
+              <small>
+                سيصلك تنبيه بمجرد تحديث حالة الدفع
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="editForm.workflow_status === 'paid'"
+            class="payment-success">
+
+            <span>
+              ✓
+            </span>
+
+            <div>
+
+              <strong>
+                تم تأكيد الدفع
+              </strong>
+
+              <small>
+                الدفع مؤكد والطلب ما زال قيد متابعة الحجز
+              </small>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CUSTOMER CHAT
+        ================================================ -->
+
+        <section class="drawer-block customer-chat-block">
+
+          <div class="chat-block-head">
+
+            <div>
+
+              <span class="chat-live-dot"></span>
+
+              <div>
+                <h3>محادثة العميل</h3>
+                <p>شاهدي المحادثة كاملة وتدخلي وقت الحاجة.</p>
+              </div>
+
+            </div>
+
+            <div class="chat-mode-badge"
+              [class.agent-mode]="isChatOwnedByMe">
+              {{
+                isChatReadOnly
+                  ? 'للقراءة فقط'
+                  : isChatOwnedByMe
+                    ? 'أنتِ داخل المحادثة'
+                    : 'البوت يدير المحادثة'
+              }}
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="chatLoading"
+            class="chat-panel-state">
+            جاري تحميل المحادثة...
+          </div>
+
+
+          <div
+            *ngIf="!chatLoading && !chatSession"
+            class="chat-panel-state">
+            لا توجد محادثة مرتبطة بهذا الطلب.
+          </div>
+
+
+          <ng-container
+            *ngIf="!chatLoading && chatSession">
+
+            <div class="chat-toolbar">
+
+              <div class="chat-toolbar-info">
+                <strong>
+                  {{ chatSession.name || editForm.name || 'العميل' }}
+                </strong>
+                <span>
+                  {{ chatSession.customer_email || chatSession.phone || editForm.phone || 'بدون وسيلة تواصل مسجلة' }}
+                </span>
+              </div>
+
+
+              <button
+                *ngIf="!isChatOwnedByMe && !isChatReadOnly"
+                type="button"
+                class="take-chat-button"
+                [disabled]="chatActionLoading"
+                (click)="takeOverChat()">
+                {{ chatActionLoading ? 'جاري الاستلام...' : 'استلام المحادثة' }}
+              </button>
+
+
+              <button
+                *ngIf="isChatOwnedByMe && !isChatReadOnly"
+                type="button"
+                class="release-chat-button"
+                [disabled]="chatActionLoading"
+                (click)="releaseChat()">
+                {{ chatActionLoading ? 'جاري...' : 'إرجاع للبوت' }}
+              </button>
+
+            </div>
+
+
+            <div
+              *ngIf="chatError"
+              class="chat-error">
+              {{ chatError }}
+            </div>
+
+
+            <div class="agent-chat-messages">
+
+              <div
+                *ngIf="chatMessages.length === 0"
+                class="chat-empty">
+                لا توجد رسائل حتى الآن.
+              </div>
+
+
+              <div
+                *ngFor="let message of chatMessages"
+                class="agent-chat-message"
+                [class.customer-message]="message.sender === 'user'"
+                [class.agent-message]="message.sender === 'agent'"
+                [class.bot-message]="message.sender === 'bot'"
+                [class.system-message]="message.sender === 'system'">
+
+                <div class="message-meta">
+                  <strong>
+                    {{ getChatSenderLabel(message.sender) }}
+                  </strong>
+                  <time>
+                    {{ message.created_at | date:'dd/MM - hh:mm a' }}
+                  </time>
+                </div>
+
+                <p>
+                  {{ message.message }}
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div
+              *ngIf="isChatReadOnly"
+              class="chat-readonly-note">
+              الطلب مغلق؛ المحادثة متاحة للقراءة فقط.
+            </div>
+
+
+            <div
+              *ngIf="!isChatReadOnly && !isChatOwnedByMe"
+              class="chat-takeover-note">
+              لو محتاجة تردي على العميل، استلمي المحادثة أولاً. البوت سيتوقف تلقائيًا.
+            </div>
+
+
+            <div
+              *ngIf="isChatOwnedByMe && !isChatReadOnly"
+              class="agent-chat-composer">
+
+              <textarea
+                rows="2"
+                [(ngModel)]="chatMessage"
+                [disabled]="chatSending"
+                placeholder="اكتبي رسالة للعميل..."></textarea>
+
+              <button
+                type="button"
+                [disabled]="!canSendChatMessage || chatSending"
+                (click)="sendChatMessage()">
+                {{ chatSending ? 'جاري الإرسال...' : 'إرسال' }}
+              </button>
+
+            </div>
+
+          </ng-container>
+
+        </section>
+
+
+        <!-- ===============================================
+             SECTION 01 - REQUEST DATA
+        ================================================ -->
+
+        <section class="drawer-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              01
+            </span>
+
+            <div>
+
+              <h3>
+                بيانات الطلب
+              </h3>
+
+              <p>
+                بيانات العميل والحجز الحالية
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-grid">
+
+            <label>
+
+              <span>
+                اسم العميل
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.name">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                رقم الهاتف
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.phone">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                المكان
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.place_name">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                المنطقة
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.area">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                التاريخ
+              </span>
+
+              <input
+                type="date"
+                [(ngModel)]="editForm.date">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                الوقت
+              </span>
+
+              <input
+                type="time"
+                [(ngModel)]="editForm.time">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                عدد الأشخاص
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="editForm.guests">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                الميزانية
+              </span>
+
+              <input
+                type="number"
+                min="0"
+                [(ngModel)]="editForm.budget">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                الباكدج
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.package">
+
+            </label>
+
+
+            <label>
+
+              <span>
+                الإضافات
+              </span>
+
+              <input
+                type="text"
+                [(ngModel)]="editForm.extras">
+
+            </label>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="inline-save-button"
+            [disabled]="saving"
+            (click)="saveRequest()">
+
+            {{
+              saving
+                ? 'جاري الحفظ...'
+                : 'حفظ بيانات الطلب'
+            }}
+
+          </button>
+
+        </section>
+
+
+        <!-- ===============================================
+             SECTION 02 - FOLLOW UP RESULT
+        ================================================ -->
+
+        <section class="drawer-block action-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              02
+            </span>
+
+            <div>
+
+              <h3>
+                نتيجة المتابعة
+              </h3>
+
+              <p>
+                اختاري ماذا حدث في آخر تواصل
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- RESULT ACTIONS -->
+
+          <div class="result-actions">
+
+            <button
+              type="button"
+              [class.selected]="
+                editForm.workflow_status === 'contacting'
+              "
+              [disabled]="saving"
+              (click)="startContacting()">
+
+              <strong>
+                بدأت التواصل
+              </strong>
+
+              <span>
+                المكالمة بدأت والطلب قيد المتابعة
+              </span>
+
+            </button>
+
+
+            <button
+              type="button"
+              [class.selected]="
+                editForm.workflow_status === 'waiting_customer'
+              "
+              [disabled]="saving"
+              (click)="waitingCustomer()">
+
+              <strong>
+                منتظر العميل
+              </strong>
+
+              <span>
+                محتاجين رد أو معلومة من العميل
+              </span>
+
+            </button>
+
+
+            <button
+              type="button"
+              [class.selected]="
+                editForm.workflow_status === 'waiting_place'
+              "
+              [disabled]="saving"
+              (click)="waitingPlace()">
+
+              <strong>
+                منتظر المكان
+              </strong>
+
+              <span>
+                في انتظار تأكيد الفندق أو المكان
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <!-- FOLLOW-UP -->
+
+          <div class="followup-box">
+
+            <div class="followup-copy">
+
+              <strong>
+                محتاجة أكلمه مرة تانية؟
+              </strong>
+
+              <span>
+                حددي موعد المتابعة والنظام هيفكرك تلقائيًا
+              </span>
+
+            </div>
+
+
+            <div class="followup-controls">
+
+              <input
+                type="datetime-local"
+                [(ngModel)]="editForm.next_follow_up_at">
+
+
+              <button
+                type="button"
+                [disabled]="
+                  !editForm.next_follow_up_at
+                  ||
+                  saving
+                "
+                (click)="scheduleFollowUp()">
+
+                جدولة المتابعة
+
+              </button>
+
+            </div>
+
+
+            <div
+              *ngIf="editForm.next_follow_up_at"
+              class="followup-confirmation">
+
+              🔔 موعد المتابعة:
+              {{
+                editForm.next_follow_up_at
+                  | date:'dd/MM/yyyy - hh:mm a'
+              }}
+
+            </div>
+
+          </div>
+
+
+          <!-- NOTE -->
+
+          <div class="call-note">
+
+            <div class="call-note-head">
+
+              <div>
+
+                <strong>
+                  ملخص المكالمة
+                </strong>
+
+                <span>
+                  اكتبي أهم ما حدث في التواصل
+                </span>
+
+              </div>
+
+
+              <select
+                [(ngModel)]="noteForm.note_type">
+
+                <option
+                  *ngFor="let type of noteTypes"
+                  [value]="type.value">
+
+                  {{ type.label }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <textarea
+              rows="3"
+              [(ngModel)]="noteForm.content"
+              placeholder="مثال: العميل وافق على السعر، منتظرين تأكيد المكان على الساعة 4...">
+            </textarea>
+
+
+            <button
+              type="button"
+              class="add-update-button"
+              [disabled]="
+                noteSaving
+                ||
+                !noteForm.content.trim()
+              "
+              (click)="addNote()">
+
+              {{
+                noteSaving
+                  ? 'جاري الحفظ...'
+                  : 'حفظ تحديث المكالمة'
+              }}
+
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             SECTION 03 - BOOKING / ACCOUNTS
+        ================================================ -->
+
+        <section
+          *ngIf="
+            editForm.workflow_status !== 'sent_to_accounts'
+            &&
+            editForm.workflow_status !== 'payment_review'
+            &&
+            editForm.workflow_status !== 'paid'
+            &&
+            editForm.workflow_status !== 'completed'
+          "
+          class="drawer-block handoff-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              03
+            </span>
+
+            <div>
+
+              <h3>
+                تأكيد الحجز
+              </h3>
+
+              <p>
+                بعد تأكيد المكان يتم إرسال الطلب للحسابات
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- NOT CONFIRMED YET -->
+
+          <div
+            *ngIf="
+              editForm.workflow_status !== 'booking_confirmed'
+            "
+            class="handoff-action">
+
+            <div>
+
+              <strong>
+                هل المكان أكد الحجز؟
+              </strong>
+
+              <span>
+                لا تضغطي تأكيد إلا بعد التأكد من المكان
+              </span>
+
+            </div>
+
+
+            <button
+              type="button"
+              [disabled]="saving"
+              (click)="confirmBooking()">
+
+              تأكيد الحجز
+
+            </button>
+
+          </div>
+
+
+          <!-- CONFIRMED -->
+
+          <div
+            *ngIf="
+              editForm.workflow_status === 'booking_confirmed'
+            "
+            class="handoff-action confirmed">
+
+            <div>
+
+              <strong>
+                ✓ تم تأكيد الحجز
+              </strong>
+
+              <span>
+                الطلب جاهز لمراجعة الدفع
+              </span>
+
+            </div>
+
+
+            <button
+              type="button"
+              [disabled]="saving"
+              (click)="sendToAccounts()">
+
+              إرسال للحسابات
+
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             ACCOUNTS WAITING
+        ================================================ -->
+
+        <section
+          *ngIf="
+            editForm.workflow_status === 'sent_to_accounts'
+            ||
+            editForm.workflow_status === 'payment_review'
+          "
+          class="drawer-block accounts-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              03
+            </span>
+
+            <div>
+
+              <h3>
+                مراجعة الحسابات
+              </h3>
+
+              <p>
+                الطلب حاليًا عند قسم الحسابات
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="accounts-pending-card">
+
+            <span class="accounts-pending-icon">
+              $
+            </span>
+
+
+            <div>
+
+              <strong>
+                في انتظار رد الحسابات
+              </strong>
+
+              <p>
+                لا تحتاجين لإغلاق الطلب الآن. سيصلك إشعار بمجرد تحديث حالة الدفع.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             PAID
+        ================================================ -->
+
+        <section
+          *ngIf="editForm.workflow_status === 'paid'"
+          class="drawer-block paid-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              03
+            </span>
+
+            <div>
+
+              <h3>
+                تم تأكيد الدفع
+              </h3>
+
+              <p>
+                الحسابات أنهت مراجعة الدفع
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="paid-card">
+
+            <span>
+              ✓
+            </span>
+
+
+            <div>
+
+              <strong>
+                الدفع مؤكد
+              </strong>
+
+              <p>
+                الدفع مؤكد. تابعي حالة الحجز مع المكان قبل إغلاق الطلب.
+              </p>
+
+            </div>
+            <span class="paid-next-step">متابعة الحجز مع المكان</span>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             SECTION 04 - HISTORY
+        ================================================ -->
+
+        <section class="drawer-block history-block">
+
+          <div class="block-title">
+
+            <span class="block-number">
+              04
+            </span>
+
+            <div>
+
+              <h3>
+                سجل الطلب
+              </h3>
+
+              <p>
+                كل التحديثات التي تم تسجيلها على الطلب
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="drawerLoading"
+            class="history-empty">
+
+            جاري تحميل السجل...
+
+          </div>
+
+
+          <div
+            *ngIf="
+              !drawerLoading
+              &&
+              notes.length === 0
+            "
+            class="history-empty">
+
+            لا توجد تحديثات مسجلة على الطلب حتى الآن.
+
+          </div>
+
+
+          <div
+            *ngIf="notes.length > 0"
+            class="timeline">
+
+            <article
+              *ngFor="
+                let note of notes;
+                trackBy: trackByNoteId
+              ">
+
+              <div class="timeline-line">
+
+                <span></span>
+
+              </div>
+
+
+              <div class="timeline-body">
+
+                <div class="timeline-top">
+
+                  <strong>
+                    {{ getNoteLabel(note.note_type) }}
+                  </strong>
+
+                  <time>
+                    {{
+                      note.created_at
+                        | date:'dd/MM/yyyy - hh:mm a'
+                    }}
+                  </time>
+
+                </div>
+
+
+                <p>
+                  {{ note.content }}
+                </p>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =================================================
+           DRAWER FOOTER
+      ================================================== -->
+
+      <footer class="drawer-footer">
+
+        <div
+          *ngIf="
+            editForm.workflow_status === 'sent_to_accounts'
+            ||
+            editForm.workflow_status === 'payment_review'
+          "
+          class="footer-info">
+
+          الطلب في انتظار رد الحسابات
+
+        </div>
+
+
+        <div
+          *ngIf="editForm.workflow_status === 'paid'"
+          class="footer-paid">
+          <span>✓ الحسابات أكدت الدفع — تابعي الحجز مع المكان</span>
+        </div>
+
+
+        <button
+          type="button"
+          class="footer-close"
+          [disabled]="saving || noteSaving"
+          (click)="closeRequest()">
+
+          إغلاق
+
+        </button>
+
+      </footer>
+
+    </aside>
+
+  </div>
+
+</div>

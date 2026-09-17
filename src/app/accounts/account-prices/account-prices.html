@@ -1,0 +1,869 @@
+<section
+  class="prices-page"
+  dir="rtl">
+
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <div class="page-head">
+
+    <div class="page-title">
+
+      <span class="eyebrow">
+        Management
+      </span>
+
+      <h1>
+        Price Management
+      </h1>
+
+      <p>
+        إدارة أسعار الأماكن والباقات والتكلفة وهامش الربح.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="loading"
+      (click)="loadPlaces()">
+
+      <lucide-icon
+        [img]="RefreshCw"
+        [size]="17">
+      </lucide-icon>
+
+      <span>
+        Refresh
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       MESSAGES
+  ====================================================== -->
+
+  <div
+    *ngIf="successMessage"
+    class="message success">
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="errorMessage"
+    class="message error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =====================================================
+       TOOLBAR
+  ====================================================== -->
+
+  <div class="toolbar">
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="18">
+      </lucide-icon>
+
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search places or packages...">
+
+    </div>
+
+
+    <div class="place-count">
+
+      {{ filteredPlaces.length }}
+
+      <span>
+        Places
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       LOADING
+  ====================================================== -->
+
+  <div
+    *ngIf="loading"
+    class="state-card">
+
+    Loading prices...
+
+  </div>
+
+
+  <!-- =====================================================
+       TABLE
+  ====================================================== -->
+
+  <div
+    *ngIf="!loading"
+    class="table-card">
+
+    <div class="table-scroll">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Place / Package
+            </th>
+
+            <th>
+              Selling Price
+            </th>
+
+            <th>
+              Cost Price
+            </th>
+
+            <th>
+              Profit
+            </th>
+
+            <th>
+              Margin
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th>
+              Action
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <ng-container
+            *ngFor="
+              let place of filteredPlaces
+            ">
+
+
+            <!-- ===========================================
+                 PLACE ROW
+            ============================================ -->
+
+            <tr
+              class="place-row">
+
+              <!-- PLACE -->
+
+              <td>
+
+                <div class="place-cell">
+
+                  <div class="place-name-line">
+
+                    <button
+                      *ngIf="hasPackages(place)"
+                      type="button"
+                      class="expand-button"
+                      (click)="togglePackages(place)">
+
+                      <lucide-icon
+                        [img]="
+                          isExpanded(place)
+                            ? ChevronUp
+                            : ChevronDown
+                        "
+                        [size]="15">
+                      </lucide-icon>
+
+                    </button>
+
+
+                    <strong>
+                      {{ place.name }}
+                    </strong>
+
+                  </div>
+
+
+                  <span>
+                    {{ place.area || '—' }}
+                  </span>
+
+
+                  <small
+                    *ngIf="hasPackages(place)"
+                    class="packages-count">
+
+                    {{ getPackages(place).length }}
+
+                    Packages
+
+                  </small>
+
+
+                  <small
+                    *ngIf="!hasPackages(place)"
+                    class="no-packages">
+
+                    No packages
+
+                  </small>
+
+                </div>
+
+              </td>
+
+
+              <!-- SELLING -->
+
+              <td>
+
+                <div class="price-value selling">
+
+                  <strong>
+
+                    {{
+                      formatMoney(
+                        getPlaceSellingPrice(
+                          place
+                        )
+                      )
+                    }}
+
+                  </strong>
+
+                  <span>
+                    EGP
+                  </span>
+
+                </div>
+
+                <small
+                  *ngIf="hasPackages(place)"
+                  class="default-label">
+
+                  Default / Starting
+
+                </small>
+
+              </td>
+
+
+              <!-- COST -->
+
+              <td>
+
+                <div class="price-value">
+
+                  <strong>
+
+                    {{
+                      formatMoney(
+                        getPlaceCostPrice(
+                          place
+                        )
+                      )
+                    }}
+
+                  </strong>
+
+                  <span>
+                    EGP
+                  </span>
+
+                </div>
+
+              </td>
+
+
+              <!-- PROFIT -->
+
+              <td>
+
+                <div class="price-value profit">
+
+                  <strong>
+
+                    {{
+                      formatMoney(
+                        getPlaceProfit(
+                          place
+                        )
+                      )
+                    }}
+
+                  </strong>
+
+                  <span>
+                    EGP
+                  </span>
+
+                </div>
+
+              </td>
+
+
+              <!-- MARGIN -->
+
+              <td>
+
+                <span class="margin-value">
+
+                  {{
+                    getPlaceMargin(place)
+                      | number:'1.0-2'
+                  }}%
+
+                </span>
+
+              </td>
+
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [class.inactive]="
+                    !place.active
+                  ">
+
+                  {{
+                    place.active
+                      ? 'Active'
+                      : 'Inactive'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTION -->
+
+              <td>
+
+                <button
+                  type="button"
+                  class="edit-button"
+                  title="Edit place price"
+                  (click)="openPlaceEdit(place)">
+
+                  <lucide-icon
+                    [img]="Pencil"
+                    [size]="15">
+                  </lucide-icon>
+
+                </button>
+
+              </td>
+
+            </tr>
+
+
+            <!-- ===========================================
+                 PACKAGES
+            ============================================ -->
+
+            <ng-container
+              *ngIf="
+                hasPackages(place)
+                &&
+                isExpanded(place)
+              ">
+
+              <tr
+                *ngFor="
+                  let item of getPackages(place);
+                  let i = index
+                "
+                class="package-row">
+
+                <!-- PACKAGE -->
+
+                <td>
+
+                  <div class="package-cell">
+
+                    <div class="package-icon">
+
+                      <lucide-icon
+                        [img]="Package"
+                        [size]="15">
+                      </lucide-icon>
+
+                    </div>
+
+
+                    <div>
+
+                      <strong>
+                        {{ item.name || 'Unnamed Package' }}
+                      </strong>
+
+                      <span>
+                        Package
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <!-- SELLING -->
+
+                <td>
+
+                  <div class="price-value selling">
+
+                    <strong>
+
+                      {{
+                        formatMoney(
+                          getPackageSellingPrice(
+                            item
+                          )
+                        )
+                      }}
+
+                    </strong>
+
+                    <span>
+                      EGP
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- COST -->
+
+                <td>
+
+                  <div class="price-value">
+
+                    <strong>
+
+                      {{
+                        formatMoney(
+                          getPackageCostPrice(
+                            item
+                          )
+                        )
+                      }}
+
+                    </strong>
+
+                    <span>
+                      EGP
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- PROFIT -->
+
+                <td>
+
+                  <div class="price-value profit">
+
+                    <strong>
+
+                      {{
+                        formatMoney(
+                          getPackageProfit(
+                            item
+                          )
+                        )
+                      }}
+
+                    </strong>
+
+                    <span>
+                      EGP
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- MARGIN -->
+
+                <td>
+
+                  <span class="margin-value">
+
+                    {{
+                      getPackageMargin(item)
+                        | number:'1.0-2'
+                    }}%
+
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span class="package-badge">
+                    Package
+                  </span>
+
+                </td>
+
+
+                <!-- ACTION -->
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="edit-button"
+                    title="Edit package price"
+                    (click)="
+                      openPackageEdit(
+                        place,
+                        item,
+                        i
+                      )
+                    ">
+
+                    <lucide-icon
+                      [img]="Pencil"
+                      [size]="15">
+                    </lucide-icon>
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+            </ng-container>
+
+          </ng-container>
+
+
+          <!-- ===========================================
+               EMPTY
+          ============================================ -->
+
+          <tr
+            *ngIf="
+              filteredPlaces.length === 0
+            ">
+
+            <td
+              colspan="7"
+              class="empty-cell">
+
+              No places found.
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       EDIT MODAL
+  ====================================================== -->
+
+  <div
+    *ngIf="
+      editingTarget
+      &&
+      editingPlace
+    "
+    class="modal-backdrop"
+    (click)="closeEdit()">
+
+    <div
+      class="price-modal"
+      (click)="
+        $event.stopPropagation()
+      ">
+
+
+      <!-- HEADER -->
+
+      <div class="modal-head">
+
+        <div>
+
+          <span>
+
+            {{
+              editingTarget === 'place'
+                ? 'Edit Place Prices'
+                : 'Edit Package Prices'
+            }}
+
+          </span>
+
+
+          <strong>
+
+            {{
+              editingTarget === 'place'
+                ? editingPlace.name
+                : editingPackage?.name
+            }}
+
+          </strong>
+
+
+          <small
+            *ngIf="
+              editingTarget === 'package'
+            ">
+
+            {{ editingPlace.name }}
+
+          </small>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          [disabled]="saving"
+          (click)="closeEdit()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="19">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+
+      <div class="modal-body">
+
+        <div
+          *ngIf="
+            editingTarget === 'place'
+            &&
+            hasPackages(editingPlace)
+          "
+          class="price-info">
+
+          هذا هو السعر الأساسي للمكان.
+
+          أسعار الباقات يتم تعديلها بشكل منفصل.
+
+        </div>
+
+
+        <div class="price-fields">
+
+
+          <!-- SELLING -->
+
+          <label>
+
+            <span>
+              Selling Price
+            </span>
+
+
+            <div class="money-input">
+
+              <input
+                type="number"
+                min="0"
+                step="1"
+                [(ngModel)]="
+                  sellingPrice
+                ">
+
+
+              <strong>
+                EGP
+              </strong>
+
+            </div>
+
+          </label>
+
+
+          <!-- COST -->
+
+          <label>
+
+            <span>
+              Cost Price
+            </span>
+
+
+            <div class="money-input">
+
+              <input
+                type="number"
+                min="0"
+                step="1"
+                [(ngModel)]="
+                  costPrice
+                ">
+
+
+              <strong>
+                EGP
+              </strong>
+
+            </div>
+
+          </label>
+
+        </div>
+
+
+        <!-- CALCULATION -->
+
+        <div class="calculation-card">
+
+          <div>
+
+            <span>
+              Profit
+            </span>
+
+            <strong>
+
+              {{
+                formatMoney(
+                  editProfit
+                )
+              }}
+
+              EGP
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Margin
+            </span>
+
+            <strong>
+
+              {{
+                editMargin
+                  | number:'1.0-2'
+              }}%
+
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <p class="calculation-note">
+
+          Profit and margin are calculated automatically from the selling and cost prices.
+
+        </p>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeEdit()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="savePrices()">
+
+          <lucide-icon
+            [img]="Save"
+            [size]="16">
+          </lucide-icon>
+
+
+          <span>
+
+            {{
+              saving
+                ? 'Saving...'
+                : 'Save Changes'
+            }}
+
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

@@ -1,0 +1,67 @@
+<div
+  class="place-card"
+  (click)="select()"
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="'اختيار ' + place.name">
+
+  <div class="place-image">
+
+    <img
+      [src]="place.image || 'assets/placeholder.jpg'"
+      [alt]="place.name">
+
+<div class="price-badge">
+  <span class="price-prefix">يبدأ من </span>
+
+  <strong>
+    {{ place.price || 0 }}
+  </strong>
+
+  <span class="price-currency">
+    جنيه
+  </span>
+
+  <span class="price-separator">
+    /
+  </span>
+
+  <span class="price-person">
+    للفرد
+  </span>
+</div>
+  </div>
+
+
+  <div class="place-content">
+
+    <h3>
+      {{ place.name }}
+    </h3>
+
+    <div class="place-location">
+      {{ place.area || 'غير محدد' }}
+    </div>
+
+
+    <div class="place-footer">
+
+      <span class="place-hint">
+        تفاصيل المكان
+      </span>
+
+      <button
+        type="button"
+        class="details-button"
+        (click)="select(); $event.stopPropagation()">
+
+        عرض التفاصيل
+        <span>←</span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

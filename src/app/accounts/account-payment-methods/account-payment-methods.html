@@ -1,0 +1,964 @@
+<section
+  class="payment-methods-page"
+  dir="rtl">
+
+
+  <!-- ============================================= -->
+  <!-- HEADER -->
+  <!-- ============================================= -->
+
+  <div class="page-head">
+
+    <div class="page-title">
+
+      <span class="eyebrow">
+        Management
+      </span>
+
+      <h1>
+        Payment Methods
+      </h1>
+
+      <p>
+        إدارة طرق الدفع والرسوم وبيانات التحويل.
+      </p>
+
+    </div>
+
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="refresh-button"
+        [disabled]="loading"
+        (click)="loadMethods()">
+
+        <lucide-icon
+          [img]="RefreshCw"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          Refresh
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="add-button"
+        (click)="openCreate()">
+
+        <lucide-icon
+          [img]="Plus"
+          [size]="17">
+        </lucide-icon>
+
+        <span>
+          Add Payment Method
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- MESSAGES -->
+  <!-- ============================================= -->
+
+  <div
+    *ngIf="successMessage"
+    class="message success">
+
+    {{ successMessage }}
+
+  </div>
+
+
+  <div
+    *ngIf="errorMessage"
+    class="message error">
+
+    {{ errorMessage }}
+
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- TOOLBAR -->
+  <!-- ============================================= -->
+
+  <div class="toolbar">
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="Search"
+        [size]="18">
+      </lucide-icon>
+
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search payment methods...">
+
+    </div>
+
+
+    <div class="methods-count">
+
+      {{ filteredMethods.length }}
+
+      <span>
+        Payment Methods
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- LOADING -->
+  <!-- ============================================= -->
+
+  <div
+    *ngIf="loading"
+    class="state-card">
+
+    Loading payment methods...
+
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- TABLE -->
+  <!-- ============================================= -->
+
+  <div
+    *ngIf="!loading"
+    class="table-card">
+
+    <div class="table-scroll">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              <strong>
+                Payment Method
+              </strong>
+
+              <small>
+                طريقة الدفع
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Type
+              </strong>
+
+              <small>
+                النوع
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Code
+              </strong>
+
+              <small>
+                الكود
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Fee
+              </strong>
+
+              <small>
+                الرسوم
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Payment Details
+              </strong>
+
+              <small>
+                بيانات الدفع
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Status
+              </strong>
+
+              <small>
+                الحالة
+              </small>
+            </th>
+
+
+            <th>
+              <strong>
+                Actions
+              </strong>
+
+              <small>
+                الإجراءات
+              </small>
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="
+              let method of filteredMethods
+            ">
+
+
+            <!-- METHOD -->
+
+            <td>
+
+              <div class="method-cell">
+
+                <span class="method-icon">
+
+                  <lucide-icon
+                    [img]="CreditCard"
+                    [size]="17">
+                  </lucide-icon>
+
+                </span>
+
+
+                <div>
+
+                  <strong>
+                    {{ method.name }}
+                  </strong>
+
+                  <span>
+                    {{
+                      method.instructions
+                      ||
+                      'No additional instructions'
+                    }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- TYPE -->
+
+            <td>
+
+              <div class="type-value">
+
+                <strong>
+                  {{
+                    getPaymentTypeLabel(
+                      method.payment_type
+                    )
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    getPaymentTypeArabicLabel(
+                      method.payment_type
+                    )
+                  }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- CODE -->
+
+            <td>
+
+              <span class="code-value">
+                {{ method.code }}
+              </span>
+
+            </td>
+
+
+            <!-- FEE -->
+
+            <td>
+
+              <div class="fee-value">
+
+                <strong>
+                  {{
+                    formatPercent(
+                      method.fee_percent
+                    )
+                  }}
+                </strong>
+
+                <span>
+                  Service Fee
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- PAYMENT DETAILS -->
+
+            <td>
+
+
+              <!-- BANK TRANSFER -->
+
+              <div
+                *ngIf="
+                  method.payment_type ===
+                    'bank_transfer'
+                "
+                class="account-details">
+
+                <strong>
+                  {{
+                    method.account_name
+                    ||
+                    'No account name'
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    method.account_number
+                    ||
+                    'No account number'
+                  }}
+                </span>
+
+              </div>
+
+
+              <!-- PAYMENT LINK -->
+
+              <div
+                *ngIf="
+                  method.payment_type ===
+                    'payment_link'
+                "
+                class="payment-link-details">
+
+                <strong>
+                  {{
+                    method.payment_url
+                      ? 'Payment URL'
+                      : 'Generated per request'
+                  }}
+                </strong>
+
+
+                <span
+                  *ngIf="
+                    method.payment_url
+                  ">
+
+                  {{ method.payment_url }}
+
+                </span>
+
+
+                <span
+                  *ngIf="
+                    !method.payment_url
+                  ">
+
+                  يتم إنشاء الرابط حسب الطلب
+
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <div class="status-wrap">
+
+                <span
+                  class="status-dot"
+                  [class.inactive]="
+                    !method.active
+                  ">
+                </span>
+
+
+                <span class="status-text">
+
+                  {{
+                    method.active
+                      ? 'Active'
+                      : 'Inactive'
+                  }}
+
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="row-actions">
+
+
+                <!-- EDIT -->
+
+                <button
+                  type="button"
+                  class="icon-button edit"
+                  title="Edit"
+                  (click)="openEdit(method)">
+
+                  <lucide-icon
+                    [img]="Pencil"
+                    [size]="15">
+                  </lucide-icon>
+
+                </button>
+
+
+                <!-- TOGGLE -->
+
+                <button
+                  type="button"
+                  class="icon-button toggle"
+                  [class.inactive]="
+                    !method.active
+                  "
+                  [title]="
+                    method.active
+                      ? 'Deactivate'
+                      : 'Activate'
+                  "
+                  (click)="toggleMethod(method)">
+
+                  <lucide-icon
+                    [img]="Power"
+                    [size]="15">
+                  </lucide-icon>
+
+                </button>
+
+
+                <!-- DELETE -->
+
+                <button
+                  type="button"
+                  class="icon-button delete"
+                  title="Delete"
+                  [disabled]="deleting"
+                  (click)="deleteMethod(method)">
+
+                  <lucide-icon
+                    [img]="Trash2"
+                    [size]="15">
+                  </lucide-icon>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- EMPTY -->
+
+          <tr
+            *ngIf="
+              filteredMethods.length === 0
+            ">
+
+            <td
+              colspan="7"
+              class="empty-cell">
+
+              No payment methods found.
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ============================================= -->
+  <!-- MODAL -->
+  <!-- ============================================= -->
+
+  <div
+    *ngIf="modalOpen"
+    class="modal-backdrop"
+    (click)="closeModal()">
+
+
+    <div
+      class="method-modal"
+      (click)="
+        $event.stopPropagation()
+      ">
+
+
+      <!-- HEADER -->
+
+      <div class="modal-head">
+
+        <div>
+
+          <span>
+
+            {{
+              editingMethod
+                ? 'Edit Payment Method'
+                : 'New Payment Method'
+            }}
+
+          </span>
+
+
+          <strong>
+
+            {{
+              editingMethod
+                ? 'تعديل طريقة الدفع'
+                : 'إضافة طريقة دفع'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-button"
+          [disabled]="saving"
+          (click)="closeModal()">
+
+          <lucide-icon
+            [img]="X"
+            [size]="19">
+          </lucide-icon>
+
+        </button>
+
+      </div>
+
+
+      <!-- BODY -->
+
+      <div class="modal-body">
+
+
+        <div class="form-grid">
+
+
+          <!-- NAME -->
+
+          <label>
+
+            <span>
+              Method Name
+            </span>
+
+            <small>
+              اسم طريقة الدفع
+            </small>
+
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="مثال: بنك مصر">
+
+          </label>
+
+
+          <!-- CODE -->
+
+          <label>
+
+            <span>
+              Code
+            </span>
+
+            <small>
+              الكود
+            </small>
+
+            <input
+              type="text"
+              [(ngModel)]="form.code"
+              placeholder="banque_misr">
+
+          </label>
+
+
+          <!-- PAYMENT TYPE -->
+
+          <label>
+
+            <span>
+              Payment Type
+            </span>
+
+            <small>
+              نوع طريقة الدفع
+            </small>
+
+            <select
+              [(ngModel)]="
+                form.payment_type
+              "
+              (ngModelChange)="
+                onPaymentTypeChange()
+              ">
+
+              <option
+                value="bank_transfer">
+
+                Bank Transfer
+
+              </option>
+
+
+              <option
+                value="payment_link">
+
+                Payment Link
+
+              </option>
+
+            </select>
+
+          </label>
+
+
+          <!-- FEE -->
+
+          <label>
+
+            <span>
+              Fee Percentage
+            </span>
+
+            <small>
+              نسبة الرسوم
+            </small>
+
+            <div class="percent-input">
+
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                [(ngModel)]="
+                  form.fee_percent
+                ">
+
+              <strong>
+                %
+              </strong>
+
+            </div>
+
+          </label>
+
+
+          <!-- SORT ORDER -->
+
+          <label>
+
+            <span>
+              Sort Order
+            </span>
+
+            <small>
+              ترتيب الظهور
+            </small>
+
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="
+                form.sort_order
+              ">
+
+          </label>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- BANK TRANSFER FIELDS -->
+        <!-- ========================================= -->
+
+        <div
+          *ngIf="
+            form.payment_type ===
+              'bank_transfer'
+          "
+          class="conditional-section">
+
+          <div class="conditional-head">
+
+            <strong>
+              Bank Transfer Details
+            </strong>
+
+            <span>
+              بيانات التحويل البنكي
+            </span>
+
+          </div>
+
+
+          <div class="form-grid">
+
+
+            <!-- ACCOUNT NAME -->
+
+            <label>
+
+              <span>
+                Account Name
+              </span>
+
+              <small>
+                اسم الحساب
+              </small>
+
+              <input
+                type="text"
+                [(ngModel)]="
+                  form.account_name
+                "
+                placeholder="Tasahel">
+
+            </label>
+
+
+            <!-- ACCOUNT NUMBER -->
+
+            <label>
+
+              <span>
+                Account Number
+              </span>
+
+              <small>
+                رقم الحساب
+              </small>
+
+              <input
+                type="text"
+                [(ngModel)]="
+                  form.account_number
+                "
+                placeholder="Account number">
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- PAYMENT LINK FIELDS -->
+        <!-- ========================================= -->
+
+        <div
+          *ngIf="
+            form.payment_type ===
+              'payment_link'
+          "
+          class="conditional-section">
+
+          <div class="conditional-head">
+
+            <strong>
+              Payment Link
+            </strong>
+
+            <span>
+              رابط الدفع
+            </span>
+
+          </div>
+
+
+          <label class="full-field">
+
+            
+            <input
+              type="url"
+              [(ngModel)]="
+                form.payment_url
+              "
+              placeholder="https://...">
+
+          </label>
+
+
+      
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- INSTRUCTIONS -->
+        <!-- ========================================= -->
+
+        <label class="full-field">
+
+          <span>
+            Payment Instructions
+          </span>
+
+          <small>
+            تعليمات الدفع
+          </small>
+
+          <textarea
+            rows="4"
+            [(ngModel)]="
+              form.instructions
+            "
+            placeholder="أدخل التعليمات التي ستظهر للعميل...">
+          </textarea>
+
+        </label>
+
+
+        <!-- ========================================= -->
+        <!-- ACTIVE -->
+        <!-- ========================================= -->
+
+        <label class="active-control">
+
+          <div>
+
+            <strong>
+              Active Payment Method
+            </strong>
+
+            <span>
+              طريقة الدفع مفعلة
+            </span>
+
+          </div>
+
+
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              form.active
+            ">
+
+        </label>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="saving"
+          (click)="closeModal()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="save-button"
+          [disabled]="saving"
+          (click)="saveMethod()">
+
+          <lucide-icon
+            [img]="Save"
+            [size]="16">
+          </lucide-icon>
+
+
+          <span>
+
+            {{
+              saving
+                ? 'Saving...'
+                : 'Save Changes'
+            }}
+
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
