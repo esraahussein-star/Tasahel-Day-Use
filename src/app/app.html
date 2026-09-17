@@ -1,0 +1,49 @@
+<!-- <div class="app">
+
+  <app-header></app-header>
+
+  <main class="main-content">
+
+    <section class="chat-panel">
+
+      <app-chat
+        #chat
+        [places]="places"
+        [placesLoading]="loadingPlaces">
+      </app-chat>
+
+    </section>
+
+
+    <section class="dayuse-wrapper">
+
+      <div
+        *ngIf="loadingPlaces"
+        class="places-state">
+
+        جاري تحميل الأماكن ❤️
+
+      </div>
+
+
+      <div
+        *ngIf="!loadingPlaces && placesError"
+        class="places-state error">
+
+        {{ placesError }}
+
+      </div>
+
+
+      <app-day-use
+        *ngIf="!loadingPlaces && !placesError"
+        [places]="places"
+        (placeSelected)="onPlaceSelected($event)">
+      </app-day-use>
+
+    </section>
+
+  </main>
+
+</div> -->
+<router-outlet></router-outlet>
